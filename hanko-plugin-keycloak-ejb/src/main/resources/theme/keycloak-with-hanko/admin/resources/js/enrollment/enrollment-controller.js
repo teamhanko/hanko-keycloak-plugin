@@ -13,7 +13,7 @@ module.controller('EnrollmentCtrl', function($scope, $http, realm, user, $route,
         if (requestId) {
             EnrollmentService.getUafRequest(currentUser, requestId, userToEnrollRealm).then(function(result) {
                 $scope.lastUafRequest = result.data;
-                $scope.lastUafRequestQrCodeLink = result.data.links.find(link => link.rel === 'qrcode';).href;
+                $scope.lastUafRequestQrCodeLink = result.data.links.find(link => link.rel === 'qrcode').href;
             }).catch(function(error) {
                 Notifications.error("Could not load pending registration request: " + error);
             });
