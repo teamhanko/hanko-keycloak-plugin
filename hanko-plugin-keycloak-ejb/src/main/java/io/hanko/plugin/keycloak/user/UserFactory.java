@@ -23,9 +23,8 @@ public class UserFactory {
 
     public static User getUser(KeycloakSession session) {
         if (session == null) throw new NotAuthorizedException("Session cannot be null");
-        AppAuthManager manager = new AppAuthManager();
-        RealmModel realm = session.getContext().getRealm();
-        AuthenticationManager.AuthResult authResult = manager.authenticateBearerToken(session, realm);
+        AppAuthManager.BearerTokenAuthenticator authenticator = new AppAuthManager.BearerTokenAuthenticator(session);
+        AuthenticationManager.AuthResult authResult = authenticator.authenticate();
         if (authResult == null) throw new NotAuthorizedException("AuthResult cannot be null");
         return getUser(authResult);
     }
