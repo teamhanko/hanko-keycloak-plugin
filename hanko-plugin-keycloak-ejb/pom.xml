@@ -11,7 +11,7 @@
         <keycloak.version>9.0.3</keycloak.version>
         <plugin.version>1.0.0</plugin.version>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>        
+        <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
 
     <name>HANKO Plugin Keycloak EJB</name>
@@ -87,9 +87,9 @@
             <artifactId>maven-install-plugin</artifactId>
             <version>2.5.1</version>
             <configuration>
-                <groupId>org.somegroup</groupId>
-                <artifactId>someartifact</artifactId>
-                <version>1.0</version>
+                <groupId>io.hanko</groupId>
+                <artifactId>java-sdk</artifactId>
+                <version>1.0.7</version>
                 <packaging>jar</packaging>
                 <file>${basedir}/java-sdk.jar</file>
                 <generatePom>true</generatePom>
@@ -103,7 +103,7 @@
                     <phase>validate</phase>
                 </execution>
             </executions>
-            </plugin>            
+            </plugin>
         </plugins>
     </build>
 </project>
