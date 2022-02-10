@@ -3,10 +3,9 @@ package io.hanko.plugin.keycloak.provider;
 import io.hanko.plugin.keycloak.HankoLogger;
 import io.hanko.plugin.keycloak.SupportedProtocols;
 import io.hanko.plugin.keycloak.authenticator.HankoCredentialModel;
-import io.hanko.plugin.keycloak.user.User;
-import io.hanko.plugin.keycloak.user.UserFactory;
 import io.hanko.plugin.keycloak.serialization.ChangePasswordRequest;
 import io.hanko.plugin.keycloak.serialization.HankoStatusResponse;
+import io.hanko.plugin.keycloak.user.User;
 import io.hanko.sdk.models.*;
 import org.keycloak.forms.account.freemarker.model.RealmBean;
 import org.keycloak.forms.account.freemarker.model.UrlBean;
@@ -21,7 +20,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ProfileProvider extends ResourceProvider {
 
@@ -263,14 +264,6 @@ public class ProfileProvider extends ResourceProvider {
             attributes.put("keycloakRealmId", context.getRealm().getId());
             attributes.put("keycloakClientId", "hanko-account");
             attributes.put("url", url);
-
-            try {
-                User user = UserFactory.getUser(session);
-                Locale locale = session.getContext().resolveLocale(user.delegate());
-                attributes.put("locale", locale);
-            } catch (Exception e) {
-                HankoLogger.setAttributeFailed("locale", e);
-            }
 
             return freeMarker.processTemplate(attributes, templateName, theme);
         } catch (FreeMarkerException e) {
