@@ -7,7 +7,7 @@ echo Clean dist directory
 rm -rf dist/
 mkdir dist
 
-echo Buildung React frontend
+echo Building React frontend
 cd hanko-account && npm install && npm run build-keycloak
 cd ..
 
