@@ -23,4 +23,5 @@ cp hanko-account/dist/main.css hanko-plugin-keycloak-ejb/src/main/resources/them
 
 
 echo Building ejb package
+mvn validate
 mvn package
