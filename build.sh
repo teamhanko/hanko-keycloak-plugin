@@ -3,21 +3,24 @@
 # exit on any error
 set -e
 
+echo Compiling java sources
+mvn clean compile
+
 echo Building React frontend
 cd hanko-account && npm install && npm run build-keycloak
 cd ..
 
 echo Copy account-hanko.html
-cp hanko-account/dist/index.html hanko-plugin-keycloak-ejb/src/main/resources/theme/keycloak-with-hanko/account/account-hanko.ftl
+cp hanko-account/dist/index.html hanko-plugin-keycloak-ejb/target/classes/theme/keycloak-with-hanko/account/account-hanko.ftl
 
 echo Copy new javascript files
-rm -f hanko-plugin-keycloak-ejb/src/main/resources/theme/keycloak-with-hanko/account/resources/js/*.js
-cp hanko-account/dist/*.js hanko-plugin-keycloak-ejb/src/main/resources/theme/keycloak-with-hanko/account/resources/js/
+cp hanko-account/dist/*.js hanko-plugin-keycloak-ejb/target/classes/theme/keycloak-with-hanko/account/resources/js/
 
 echo Copy main.css
-cp hanko-account/dist/main.css hanko-plugin-keycloak-ejb/src/main/resources/theme/keycloak-with-hanko/account/resources/css/main.css
+cp hanko-account/dist/main.css hanko-plugin-keycloak-ejb/target/classes/theme/keycloak-with-hanko/account/resources/css/main.css
 
-
-echo Building ejb package
+echo Installing java-sdk into local maven repo
 mvn validate
+
+echo Packaging plugin ear
 mvn package
