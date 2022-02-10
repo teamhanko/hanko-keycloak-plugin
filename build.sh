@@ -3,10 +3,6 @@
 # exit on any error
 set -e
 
-echo Clean dist directory
-rm -rf dist/
-mkdir dist
-
 echo Building React frontend
 cd hanko-account && npm install && npm run build-keycloak
 cd ..
