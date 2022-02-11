@@ -3,6 +3,10 @@
         {
             "name" : "keycloak-with-hanko",
             "types": [ "account", "admin", "login" ]
+        },
+        {
+            "name" : "kvsh",
+            "types": [ "account", "login" ]
         }
     ]
 }
