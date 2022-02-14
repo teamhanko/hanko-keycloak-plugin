@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ProfileProvider extends ResourceProvider {
 
@@ -96,6 +97,9 @@ public class ProfileProvider extends ResourceProvider {
         try {
             CreateUafRequest req = new CreateUafRequest();
 
+            if (user.getHankoUserId() == null) {
+                user.setHankoUserId(UUID.randomUUID().toString());
+            }
             req.setUserId(user.getHankoUserId());
             req.setUsername(user.delegate().getUsername());
             req.setClientData(getContextClientData());
@@ -122,6 +126,9 @@ public class ProfileProvider extends ResourceProvider {
         try {
             CreateWebAuthnRequest req = new CreateWebAuthnRequest();
 
+            if (user.getHankoUserId() == null) {
+                user.setHankoUserId(UUID.randomUUID().toString());
+            }
             req.setUserId(user.getHankoUserId());
             req.setUsername(user.delegate().getUsername());
             req.setClientData(getContextClientData());
