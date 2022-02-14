@@ -3,6 +3,9 @@
 # exit on any error
 set -e
 
+echo Installing java-sdk into local maven repo
+mvn validate
+
 echo Compiling java sources
 mvn clean compile
 
@@ -18,9 +21,6 @@ cp hanko-account/dist/*.js hanko-plugin-keycloak-ejb/target/classes/theme/keyclo
 
 echo Copy main.css
 cp hanko-account/dist/main.css hanko-plugin-keycloak-ejb/target/classes/theme/keycloak-with-hanko/account/resources/css/main.css
-
-echo Installing java-sdk into local maven repo
-mvn validate
 
 echo Packaging plugin ear
 mvn package
