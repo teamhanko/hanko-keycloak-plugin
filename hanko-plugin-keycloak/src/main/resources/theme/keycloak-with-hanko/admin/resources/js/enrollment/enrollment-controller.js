@@ -40,7 +40,7 @@ module.controller('EnrollmentCtrl', function($scope, $http, realm, user, $route,
             EnrollmentService.cancelUaf(currentUser, userToEnroll, userToEnrollRealm).then(function() {
                 Notifications.success("Pending request canceled!");
                 $route.reload();
-            }, function(err) {
+            }, function(error) {
                 Notifications.error("Error while canceling the request: " + error);
             });
         });

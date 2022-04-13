@@ -3,20 +3,15 @@
     <parent>
         <artifactId>hanko-plugin-keycloak-parent</artifactId>
         <groupId>io.hanko.plugins.keycloak</groupId>
-        <version>kc15.0.2-v1.0.0-SNAPSHOT</version>
+        <version>kc18.0.0-v1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-    </properties>
-
-    <name>HANKO Plugin Keycloak EJB</name>
+    <name>HANKO Plugin Keycloak</name>
     <description/>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hanko-plugin-keycloak-ejb</artifactId>
+    <artifactId>hanko-plugin-keycloak</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -24,36 +19,31 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-core</artifactId>
             <version>${version.keycloak}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
             <version>${version.keycloak}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi-private</artifactId>
             <version>${version.keycloak}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-services</artifactId>
             <version>${version.keycloak}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-model-jpa</artifactId>
             <version>${version.keycloak}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>5.1.15.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>5.1.15.Final</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.hanko</groupId>
@@ -61,15 +51,10 @@
             <version>1.0.7</version>
             <type>jar</type>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.6.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
+        <finalName>hanko-plugin-keycloak</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -101,6 +86,26 @@
                     <phase>validate</phase>
                 </execution>
             </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
