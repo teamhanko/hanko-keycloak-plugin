@@ -102,7 +102,7 @@ docker run -e KEYCLOAK_ADMIN=<USERNAME> -e KEYCLOAK_ADMIN_PASSWORD=<PASSWORD> -p
 ```
 
 Keycloak uses an embedded H2 database per default. To run the container using a different database configuration see
-the section **Database** for the [jboss/keycloak](https://hub.docker.com/r/jboss/keycloak) image.
+the section **Database** for the [keycloak](https://quay.io/repository/keycloak/keycloak) image.
 
 ### Configure a client
 
