@@ -1,8 +1,0 @@
-{
-    "themes": [
-        {
-            "name" : "keycloak-with-hanko",
-            "types": [ "account", "admin", "login" ]
-        }
-    ]
-}

@@ -1,0 +1,97 @@
+.login-pf body {
+  background: #f0f0f0;
+}
+
+h1 {
+  color: #0057a3;
+  text-transform: none;
+}
+
+div.kc-logo-text {
+  background-image: url(../img/kvsh_short.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 79px;
+  width: 200px;
+}
+
+#kc-header {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+#kc-form-login {
+  margin-bottom: 10px;
+}
+#kc-header-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  background: #ffffff;
+  max-width: 500px;
+  width: 100%;
+}
+/*tablet*/
+@media (max-width: 840px) {
+  #kc-header-wrapper{
+    max-width: none;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 20px 20px 30px 20px;
+  }
+}
+@media (max-width: 767px) {
+  #kc-header-wrapper{
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 20px;
+  }
+  #kc-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.btn {
+  border: 1px solid #0057a3;
+  background-color: #0057a3;
+  color: #fafafa;
+  border-radius: 3px;
+  font-weight: 700;
+  padding: 7px;
+  cursor: pointer;
+  width: 100%;
+  -webkit-font-smoothing: antialiased;
+  height: 45px;
+  -webkit-appearance: none;
+}
+.login-pf a{
+  color: #0057a3;
+}
+
+.flexrow {
+  display: flex;
+  flex-direction: row;
+  height: 190px;
+  align-items: center;
+}
+
+.imgwrapper {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.orwrapper {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.or {
+  width: 100%;
+  text-align: center;
+  margin: 10px 0 20px;
+}

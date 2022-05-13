@@ -7,7 +7,7 @@ export const fetchApi = (
   return new Promise<any>((success, fail) => {
     const keycloakUrl = (window as any).keycloakUrl
       ? (window as any).keycloakUrl
-      : `${process.env.KEYCLOAK_URL}/auth/`
+      : `${process.env.KEYCLOAK_URL}`
 
     const realm = (window as any).realmId
       ? (window as any).realmId
