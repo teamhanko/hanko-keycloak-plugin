@@ -1,4 +1,4 @@
-FROM jboss/keycloak:15.0.2
+FROM quay.io/keycloak/keycloak:18.0.0
 
-COPY hanko-plugin-keycloak-ear/target/hanko-plugin-keycloak.ear /opt/jboss/keycloak/standalone/deployments/hanko-plugin-keycloak.ear
+COPY hanko-plugin-keycloak/target/hanko-plugin-keycloak.jar /opt/keycloak/providers/hanko-plugin-keycloak.jar
 

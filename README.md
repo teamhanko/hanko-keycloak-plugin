@@ -40,7 +40,7 @@ or initiate device binding using the Hanko Authenticator.
 
 ## Compatibility
 
-The latest version of this plugin (1.0.0) has been tested with Keycloak 9.0.3.
+The latest version of this plugin (2.0.0) has been tested with Keycloak 18.0.0
 
 You can also build the plugin yourself, see section [Building](#building) for more details.
 
@@ -98,7 +98,7 @@ docker build -t <TAG> .
 locally).
 
 ```
-docker run -e KEYCLOAK_USER=<USERNAME> -e KEYCLOAK_PASSWORD=<PASSWORD> -p 8080:8080 <TAG>
+docker run -e KEYCLOAK_ADMIN=<USERNAME> -e KEYCLOAK_ADMIN_PASSWORD=<PASSWORD> -p 8080:8080 <TAG>
 ```
 
 Keycloak uses an embedded H2 database per default. To run the container using a different database configuration see
