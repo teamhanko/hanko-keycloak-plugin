@@ -80,7 +80,7 @@ You can find the `hanko-keycloak-plugin.jar` in the `target` folder of the `hank
 ## Running with Docker
 
 The repository contains a Dockerfile that can be used to create an image and run Keycloak with the plugin in a container.
-The Dockerfile uses the [jboss/keycloak](https://hub.docker.com/r/jboss/keycloak) image. 
+The Dockerfile uses the [keycloak](https://quay.io/repository/keycloak/keycloak) image. 
 
 1. Build the project artefacts using the `build.sh` script:
 
