@@ -116,10 +116,13 @@ Before you can use the provided account page, you have to add a **Client** to yo
 3. Create a new client called **hanko-account** (in this step exact spelling matters) and leave the Root URL empty.
    ![Add Client hanko-authenticator](./docs/resources/add-client.png)
 4. In the client configuration, set **Valid Redirect URIs** to **/realms/master/hanko/*** and add
-**/realms/master/hanko** under **Web Origins** (or replace "master" with your desired realm).
+**/realms/master/hanko** under **Web Origins** (or replace "master" with your desired realm; also: if you run Keycloak
+with a different value for the `http-relative-path` configuration, either via CLI or ENV variable, be sure to prepend the
+value to the Valid Redirect URI and Web Origin, i.e. if you set the `http-relative-path` to `/auth`:
+**/auth/realms/master/hanko/*** and **/auth/realms/master/hanko**).
    ![Configure hanko-account client](./docs/resources/configure-hanko-account-client.png)
-6. Save the hanko-account client configuration.
-7. Go to configuration section **Realm Settings**, open the Themes tab and select `hanko-with-keycloak` as your **account-theme**.
+5. Save the hanko-account client configuration.
+6. Go to configuration section **Realm Settings**, open the Themes tab and select `hanko-with-keycloak` as your **account-theme**.
    ![Select your theme](docs/resources/change-login-theme.png)
 
 ## Configure authentication flows
@@ -237,7 +240,9 @@ user details. See [Using enrollment](#using-enrollment) for usage details.
 
 ### First-time access to account page
 
-Once you visit `/realms/master/hanko/status` (replace **master** with your realm name if necessary) you will be 
+Once you visit `/realms/master/hanko/status` (replace **master** with your realm name if necessary and
+prepend the `http-relative-path` value, if configured, i.e. if it is set to `/auth`, you can reach the account
+page under `/auth/realms/master/hanko/status`) you will be 
 presented with a username form. Enter the username or email address for an existing user and submit the form. 
 
 - If you have configured a passwordless authentication flow you will be prompted for authentication with a registered

@@ -16,6 +16,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.util.CookieHelper;
+import org.keycloak.utils.StringUtil;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -220,6 +221,7 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
         formsProvider.setAttribute("hasWebAuthn", hasWebAuthn(devices));
         formsProvider.setAttribute("hasLoginMethods", loginMethod.equals(LoginMethod.WEBAUTHN) && hasUaf(devices) || loginMethod.equals(LoginMethod.UAF) && hasWebAuthn(devices));
         formsProvider.setAttribute("username", username);
+        formsProvider.setAttribute("baseUrl", context.getUriInfo().getBaseUri().toString());
 
         if (error != null) {
             formsProvider.setError(Messages.INVALID_USER);
