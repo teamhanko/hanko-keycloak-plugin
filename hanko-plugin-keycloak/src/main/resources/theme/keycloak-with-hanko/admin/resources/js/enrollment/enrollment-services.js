@@ -4,7 +4,7 @@ module.factory('EnrollmentService', ['$http', function($http) {
     enrollment.registerUaf = function(currentUser, userToEnroll, userToEnrollRealm) {
         return $http({
             method: 'POST',
-            url: '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/uaf',
+            url: authUrl + '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/uaf',
             params: { userId: userToEnroll.id, realmId: userToEnrollRealm.id },
             data: {}
         })
@@ -13,7 +13,7 @@ module.factory('EnrollmentService', ['$http', function($http) {
     enrollment.registerWebAuthn = function(currentUser, userToEnroll, userToEnrollRealm) {
         return $http({
             method: 'POST',
-            url: '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/webauthn',
+            url: authUrl + '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/webauthn',
             params: { userId: userToEnroll.id },
             data: {
                 authenticatorAttachment: 'cross-platform',
@@ -28,7 +28,7 @@ module.factory('EnrollmentService', ['$http', function($http) {
 
         return $http({
             method: 'DELETE',
-            url: '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/uaf/' + requestId,
+            url: authUrl + '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/uaf/' + requestId,
             params: { userId: userToEnroll.id }
         })
     };
@@ -36,7 +36,7 @@ module.factory('EnrollmentService', ['$http', function($http) {
     enrollment.verifyWebAuthn = function(currentUser, webAuthnResponse, userToEnrollRealm, requestId) {
         return $http({
             method: 'PUT',
-            url: '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/webauthn/' + requestId,
+            url: authUrl + '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id + '/webauthn/' + requestId,
             data: webAuthnResponse
         })
     };
@@ -44,7 +44,7 @@ module.factory('EnrollmentService', ['$http', function($http) {
     enrollment.getUafRequest = function(currentUser, requestId, userToEnrollRealm) {
         return $http({
             method: 'GET',
-            url: '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id +'/uaf/' + requestId
+            url: authUrl + '/realms/' + currentUser.realm + '/enrollment/' + userToEnrollRealm.id +'/uaf/' + requestId
         })
     };
 
