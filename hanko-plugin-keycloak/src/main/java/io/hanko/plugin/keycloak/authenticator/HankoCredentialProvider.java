@@ -50,7 +50,7 @@ public class HankoCredentialProvider implements CredentialProvider<HankoCredenti
             return false;
         }
 
-        return !session.userCredentialManager().getStoredCredentialsByType(realm, user, type).isEmpty();
+        return session.userCredentialManager().getStoredCredentialsByTypeStream(realm, user, type).count() > 0;
     }
 
     @Override

@@ -1,10 +1,10 @@
 package io.hanko.plugin.keycloak;
 
 import io.hanko.plugin.keycloak.authenticator.MultiAuthenticator;
-import io.hanko.plugin.keycloak.config.ConfigException;
 import io.hanko.plugin.keycloak.authenticator.MultiAuthenticatorFactory;
-import io.hanko.plugin.keycloak.config.Configurable;
+import io.hanko.plugin.keycloak.config.ConfigException;
 import io.hanko.plugin.keycloak.config.ConfigFactory;
+import io.hanko.plugin.keycloak.config.Configurable;
 import io.hanko.sdk.HankoClient;
 import io.hanko.sdk.HankoClientConfig;
 import io.hanko.sdk.util.HankoUtils;
@@ -13,6 +13,7 @@ import org.keycloak.models.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 public class HankoClientFactory {
 
@@ -62,7 +63,7 @@ public class HankoClientFactory {
      */
     private static AuthenticatorConfigModel getHankoAuthenticatorConfig(RealmModel realm) throws ConfigException {
         AuthenticationFlowModel browserFlow = realm.getBrowserFlow();
-        List<AuthenticationExecutionModel> topLevelExecutions = realm.getAuthenticationExecutions(browserFlow.getId());
+        List<AuthenticationExecutionModel> topLevelExecutions = realm.getAuthenticationExecutionsStream(browserFlow.getId()).collect(Collectors.toList());
         Queue<AuthenticationExecutionModel> queue = new LinkedList<>(topLevelExecutions);
 
         while (!queue.isEmpty()) {
@@ -71,7 +72,7 @@ public class HankoClientFactory {
             if (currentExecution.isEnabled() && authenticator != null && authenticator.equals(MultiAuthenticatorFactory.ID)) {
                 return realm.getAuthenticatorConfigById(currentExecution.getAuthenticatorConfig());
             } else if (currentExecution.isAuthenticatorFlow()) {
-                queue.addAll(realm.getAuthenticationExecutions(currentExecution.getFlowId()));
+                queue.addAll(realm.getAuthenticationExecutionsStream(currentExecution.getFlowId()).collect(Collectors.toList()));
             }
         }
 

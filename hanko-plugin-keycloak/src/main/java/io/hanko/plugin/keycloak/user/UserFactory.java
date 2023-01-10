@@ -17,7 +17,7 @@ public class UserFactory {
 
     public static User getUser(KeycloakSession session, String userId, RealmModel realm) {
         if (session == null) throw new NotAuthorizedException("Session cannot be null");
-        UserModel user = session.users().getUserById(userId, realm);
+        UserModel user = session.users().getUserById(realm, userId);
         return new User(user);
     }
 

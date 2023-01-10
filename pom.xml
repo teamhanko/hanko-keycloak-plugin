@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.hanko.plugins.keycloak</groupId>
-    <version>2.0.2</version>
+    <version>${revision}</version>
     <artifactId>hanko-plugin-keycloak-parent</artifactId>
     <packaging>pom</packaging>
 
@@ -19,7 +19,8 @@
         </licenses>
 
     <properties>
-        <version.keycloak>18.0.0</version.keycloak>
+        <revision>2.0.3</revision>
+        <version.keycloak>20.0.2</version.keycloak>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
