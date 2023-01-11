@@ -6,7 +6,6 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
-import org.keycloak.theme.FreeMarkerUtil;
 
 public class ProfileProviderFactory implements RealmResourceProviderFactory //, ConfiguredProvider
 {
@@ -14,7 +13,6 @@ public class ProfileProviderFactory implements RealmResourceProviderFactory //, 
 
     private static ServicesLogger logger = ServicesLogger.LOGGER;
 
-    private FreeMarkerUtil freeMarker;
 
     @Override
     public String getId() {
@@ -24,17 +22,16 @@ public class ProfileProviderFactory implements RealmResourceProviderFactory //, 
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
         try{
-            ProfileProvider provider = new ProfileProvider(session, freeMarker);
+            ProfileProvider provider = new ProfileProvider(session);
             return provider;
         } catch (Exception e) {
             logger.warn("Configuration Exception for HankoProfileProvider.");
-            return new ProfileProvider(session, freeMarker);
+            return new ProfileProvider(session);
         }
     }
 
     @Override
     public void init(Config.Scope config) {
-        freeMarker = new FreeMarkerUtil();
     }
 
     @Override
@@ -43,6 +40,5 @@ public class ProfileProviderFactory implements RealmResourceProviderFactory //, 
 
     @Override
     public void close() {
-        freeMarker = null;
     }
 }

@@ -13,8 +13,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.services.resources.Cors;
 import org.keycloak.theme.FreeMarkerException;
-import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.theme.Theme;
+import org.keycloak.theme.freemarker.DefaultFreeMarkerProviderFactory;
+import org.keycloak.theme.freemarker.FreeMarkerProvider;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -24,14 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ProfileProvider extends ResourceProvider {
 
-    private FreeMarkerUtil freeMarker;
 
-    ProfileProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
+    ProfileProvider(KeycloakSession session) {
         super(session);
-        this.freeMarker = freeMarker;
     }
 
     @Override
@@ -182,7 +182,7 @@ public class ProfileProvider extends ResourceProvider {
 
             if (hankoRequest.getStatus() == Status.OK) {
 
-                List<org.keycloak.credential.CredentialModel> existingCredentials = session.userCredentialManager().getStoredCredentialsByType(context.getRealm(), user.delegate(), HankoCredentialModel.TYPE);
+                List<org.keycloak.credential.CredentialModel> existingCredentials = session.userCredentialManager().getStoredCredentialsByTypeStream(context.getRealm(), user.delegate(), HankoCredentialModel.TYPE).collect(Collectors.toList());
                 if (existingCredentials.isEmpty()) {
                     HankoCredentialModel credentials = new HankoCredentialModel(user.getHankoUserId());
                     credentials.setType(HankoCredentialModel.TYPE);
@@ -271,7 +271,7 @@ public class ProfileProvider extends ResourceProvider {
             attributes.put("keycloakRealmId", context.getRealm().getId());
             attributes.put("keycloakClientId", "hanko-account");
             attributes.put("url", url);
-
+            FreeMarkerProvider freeMarker = new DefaultFreeMarkerProviderFactory().create(session);
             return freeMarker.processTemplate(attributes, templateName, theme);
         } catch (FreeMarkerException e) {
             HankoLogger.processTemplateFailed(templateName, e);

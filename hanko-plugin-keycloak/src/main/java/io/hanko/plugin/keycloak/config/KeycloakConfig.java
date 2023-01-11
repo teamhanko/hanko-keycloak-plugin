@@ -1,5 +1,7 @@
 package io.hanko.plugin.keycloak.config;
 
+import java.util.stream.Collectors;
+
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
 
@@ -25,7 +27,7 @@ public class KeycloakConfig extends AbstractConfig<KeycloakSession> {
         verifySession(session);
 
         String value = "";
-        for (AuthenticatorConfigModel config : session.getContext().getRealm().getAuthenticatorConfigs()) {
+        for (AuthenticatorConfigModel config : session.getContext().getRealm().getAuthenticatorConfigsStream().collect(Collectors.toList())) {
             if (config.getConfig().containsKey(key)) {
                 value = getNonEmptyConfigValue(config, key, description);
             }
@@ -37,7 +39,7 @@ public class KeycloakConfig extends AbstractConfig<KeycloakSession> {
 
     private static String getNullableConfigValue(KeycloakSession session, String key, String description) throws ConfigException {
         verifySession(session);
-        for (AuthenticatorConfigModel config : session.getContext().getRealm().getAuthenticatorConfigs()) {
+        for (AuthenticatorConfigModel config : session.getContext().getRealm().getAuthenticatorConfigsStream().collect(Collectors.toList())) {
             if (config.getConfig().containsKey(key)) {
                 return getNullableConfigValue(config, key, description);
             }

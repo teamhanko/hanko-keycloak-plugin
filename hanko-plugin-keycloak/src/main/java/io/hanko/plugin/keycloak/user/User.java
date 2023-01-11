@@ -56,7 +56,7 @@ public class User {
     }
 
     private String getUserAttribute(String name) {
-        List<String> registrationId = delegate().getAttribute(name);
+        List<String> registrationId = delegate().getAttributes().get(name);
 
         if (registrationId == null || registrationId.isEmpty()) {
             return null;
