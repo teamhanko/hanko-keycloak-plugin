@@ -50,7 +50,6 @@
 			<version>1.0.7</version>
 			<type>jar</type>
 		</dependency>
-
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
@@ -63,6 +62,23 @@
 	<build>
 		<finalName>hanko-plugin-keycloak</finalName>
 		<plugins>
+			<plugin>
+				<groupId>org.jboss.jandex</groupId>
+				<artifactId>jandex-maven-plugin</artifactId>
+				<version>1.2.3</version>
+				<executions>
+					<execution>
+						<id>make-index</id>
+						<goals>
+							<goal>jandex</goal>
+						</goals>
+						<!-- phase is 'process-classes by default' -->
+						<configuration>
+							<!-- Nothing needed here for simple cases -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

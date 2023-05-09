@@ -90,7 +90,7 @@ public class EnrollmentResourceProvider extends ResourceProvider {
         }
     }
 
-    @PUT
+    @POST
     @Path("/{realmId}/webauthn/{requestId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

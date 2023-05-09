@@ -41,8 +41,16 @@ public class User {
         setUserAttribute(CONFIG_ENROLLMENT_UAF_REQUEST_ID, requestId);
     }
 
+    public String getEnrollmentUafRequestId() {
+        return getUserAttribute(CONFIG_ENROLLMENT_UAF_REQUEST_ID);
+    }
+
     public void setEnrollmentWebAuthnRequestId(String requestId) {
         setUserAttribute(CONFIG_ENROLLMENT_WEBAUTHN_REQUEST_ID, requestId);
+    }
+
+    public String getEnrollmentWebAuthnRequestId() {
+        return getUserAttribute(CONFIG_ENROLLMENT_WEBAUTHN_REQUEST_ID);
     }
 
     private void setUserAttribute(String name, String value) {

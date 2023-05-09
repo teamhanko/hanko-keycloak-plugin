@@ -4,13 +4,10 @@ This is an extension to Keycloak which integrates passwordless authentication vi
 
 For more information about Keycloak, please visit the [Keycloak homepage](https://www.keycloak.org/).
 
-For more information about Hanko, please visit the [Hanko homepage](https://hanko.io/).
-
 ## Features
 
 - Log in with either password, Hanko Authenticator (FIDO UAF) or WebAuthn (FIDO2).
-- Account-page to register and deregister a Hanko Authenticator or any FIDO2 authenticator via WebAuthn.
-- Enrollment of users via the Keycloak Admin UI - "pre"-register FIDO2 roaming authenticators (security keys)
+- Enrollment of users via provided extension endpoints - "pre"-register FIDO2 roaming authenticators (security keys)
 or initiate device binding using the Hanko Authenticator.
 
 ## Table of contents
@@ -19,28 +16,31 @@ or initiate device binding using the Hanko Authenticator.
 - [Building](#building)
 - [Running with Docker](#running-with-docker)
 - Configuration
-    - [Configure a client](#configure-a-client)
     - [Configure authentication flows](#configure-authentication-flows)
       - [Prerequisites](#prerequisites)
       - [Passwordless authentication flow](#passwordless-authentication-flow)
       - [Passwordless authentication flow with password fallback](#passwordless-authentication-flow-with-password-fallback)
-    - [Configure enrollment](#configure-enrollment)
-- Usage
-    - [Using the account page](#using-the-account-page)
-        - [First-time access to account page](#accessing-the-account-page)
-        - [Registering devices](#registering-devices)
-        - [Renaming devices and deregistering devices](#renaming-devices-and-deregistering-devices)
-        - [Login using registered devices](#login-using-registered-devices)
-            - [Login with passwordless flow](#login-with-passwordless-flow)
-            - [Login with passwordless flow with password fallback](#login-with-passwordless-flow-with-password-fallback)
-    - [Using enrollment](#using-enrollment)
-        - [Who can enroll other users?](#who-can-enroll-other-users)
-        - [Enrolling users](#enrolling-users)
-- [Theming the account page](#theming-the-account-page)
+- Using the Plugin API
+    - [Preliminary notes](#preliminary-notes)
+    - [OpenAPI Spec](#openapi-spec)
+    - [Register devices](#register-devices)
+      - [Register a WebAuthn device](#register-a-webauthn-device)
+      - [Register a UAF device/Authenticator App](#register-a-uaf-deviceauthenticator-app)
+      - [Get the status of a UAF device/Authenticator App request](#get-the-status-of-a-uaf-deviceauthenticator-app-request)
+      - [Cancel a UAF device/Authenticator App request](#cancel-a-uaf-deviceauthenticator-app-request)
+    - [Device management](#device-management)
+        - [Retrieve devices](#retrieve-devices)
+        - [Deregister devices](#deregister-devices)
+          - [Deregister a WebAuthn device](#deregister-a-webauthn-device)
+          - [Deregister a UAF device/Authenticator App device](#deregister-a-uaf-deviceauthenticator-app)
+        - [Rename devices](#rename-devices)
+          - [Rename a WebAuthn device](#rename-a-webauthn-device)
+          - [Rename a UAF device/Authenticator App device](#rename-a-uaf-deviceauthenticator-app-device)
+
 
 ## Compatibility
 
-The latest version of this plugin (2.0.0) has been tested with Keycloak 18.0.0
+The latest version of this plugin (3.0.0) has been tested with Keycloak 18.0.0
 
 You can also build the plugin yourself, see section [Building](#building) for more details.
 
@@ -69,10 +69,10 @@ git clone https://github.com/teamhanko/hanko-keycloak-plugin.git
 cd hanko-keycloak-plugin
 ```
 
-Build the plugin by running the following in the project root directory:
+Build the plugin `jar` by running the following in the project root directory:
 
 ```
-./build.sh
+mvn clean package
 ```
 
 You can find the `hanko-keycloak-plugin.jar` in the `target` folder of the `hanko-plugin-keycloak` directory.
@@ -82,10 +82,10 @@ You can find the `hanko-keycloak-plugin.jar` in the `target` folder of the `hank
 The repository contains a Dockerfile that can be used to create an image and run Keycloak with the plugin in a container.
 The Dockerfile uses the [keycloak](https://quay.io/repository/keycloak/keycloak) image. 
 
-1. Build the project artefacts using the `build.sh` script:
+1. Build the `jar` file:
 
 ```
-./build.sh
+mvn clean package
 ```
 
 2. Build the Docker image:
@@ -103,27 +103,6 @@ docker run -e KEYCLOAK_ADMIN=<USERNAME> -e KEYCLOAK_ADMIN_PASSWORD=<PASSWORD> -p
 
 Keycloak uses an embedded H2 database per default. To run the container using a different database configuration see
 the section **Database** for the [keycloak](https://quay.io/repository/keycloak/keycloak) image.
-
-### Configure a client
-
-Before you can use the provided account page, you have to add a **Client** to your realm.
-
-> :warning: If you use another realm than **master**, you have to replace **master** with your realm name in the URLs 
-> below.:
-
-1. Log in to your Keycloak administration console.
-2. Go to configuration section **Clients**.
-3. Create a new client called **hanko-account** (in this step exact spelling matters) and leave the Root URL empty.
-   ![Add Client hanko-authenticator](./docs/resources/add-client.png)
-4. In the client configuration, set **Valid Redirect URIs** to **/realms/master/hanko/*** and add
-**/realms/master/hanko** under **Web Origins** (or replace "master" with your desired realm; also: if you run Keycloak
-with a different value for the `http-relative-path` configuration, either via CLI or ENV variable, be sure to prepend the
-value to the Valid Redirect URI and Web Origin, i.e. if you set the `http-relative-path` to `/auth`:
-**/auth/realms/master/hanko/*** and **/auth/realms/master/hanko**).
-   ![Configure hanko-account client](./docs/resources/configure-hanko-account-client.png)
-5. Save the hanko-account client configuration.
-6. Go to configuration section **Realm Settings**, open the Themes tab and select `hanko-with-keycloak` as your **account-theme**.
-   ![Select your theme](docs/resources/change-login-theme.png)
 
 ## Configure authentication flows
 
@@ -219,168 +198,24 @@ configuration. Perform steps (1)-(9) as described in the previous section, then 
 24. Open the **Bindings** tab and change the **Browser Flow** to **Browser flow with Hanko**. Save the configuration.
     ![Change Binding](./docs/resources/change-binding.png)
 
-Now you can register and deregister a Hanko Authenticator by visiting the path `/realms/master/hanko/status` at 
-your Keycloak`s root-url. See [Using the account page](#using-the-account-page) for usage details.
+Users should now be able to login using either Password, WebAuthn or Authenticator App.
 
-### Configure enrollment
+## Using the Plugin API
 
-1. Log in to your Keycloak administration console.
-2. Go to configuration section **Realm Settings**, open the Themes tab and select `keycloak-with-hanko` as your **admin-theme**. Click
-the **Save** button to save the configuration.
-   ![Select your theme](docs/resources/change-account-theme.png)
-   
-In the Keycloak administration console you will now have access to a **Hanko Enrollment** section when viewing 
-user details. See [Using enrollment](#using-enrollment) for usage details.
+### OpenAPI Spec
 
-> :warning: **WARNING**: In order to enroll a user from a specific realm the realm of this user  **must** have a 
-> **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow 
+An OpenAPI specification for the endpoints can be found in the `/docs` directory (`spec.yaml`).
+
+### Preliminary notes
+
+> :warning: **WARNING**: In order to register a device for a user from a specific realm said realm  **must** have a
+> **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow
 > (see [Configure Authentication Flows](#configure-authentication-flows)).
 
-## Using the account page
-
-### First-time access to account page
-
-Once you visit `/realms/master/hanko/status` (replace **master** with your realm name if necessary and
-prepend the `http-relative-path` value, if configured, i.e. if it is set to `/auth`, you can reach the account
-page under `/auth/realms/master/hanko/status`) you will be 
-presented with a username form. Enter the username or email address for an existing user and submit the form. 
-
-- If you have configured a passwordless authentication flow you will be prompted for authentication with a registered
-device. Make sure the user has a device registered. You can use the enrollment feature to do so (see 
-[Configure enrollment](#configure-enrollment) and [Using enrollment](#using-enrollment)).
-- If you have configured an authentication flow with a password as a fallback, you can enter a password or opt for 
-logging in with a registered device. When logging in with a password, make sure a password is set for the user 
-(you can do so in the Keycloak administration console via **Manage** -> **Users** -> Select user -> **Credentials** -> **Set password**).
-
-After logging in you will be presented with the account page:
-
-![Account page](./docs/resources/account-page.png)
-
-### Registering devices
-
-You can register devices using the buttons provided in the **Registered Devices** panel:
-
-- To register using Hanko Authenticator, select **Add Hanko Authenticator**. You will be presented with a QR code. 
-Scan the QR code using the authenticator app on your mobile device. You will be prompted for an authentication gesture
-(e.g. biometric or PIN). Confirm registration by performing the authentication gesture with your device. 
-- To register a security key, select **Add Security Key**. The browser will prompt you to attach a security key to 
-your device and perform an authentication gesture. Confirm registration by performing the authentication gesture. 
-- To register a platform authenticator (e.g. Windows Hello, Touch ID) select **Add Platform Authenticator**. The browser
-will prompt you to perform an authentication gesture. Confirm registration by performing the authentication gesture. 
-
-### Renaming devices and deregistering devices 
-
-Once you have registered devices they will be displayed in the **Registered Devices** panel. You can rename 
-(pen icon in the **Manage** column) or deregister (trash can icon in the **Manage** column) them:
-
-![Rename or delete devices](./docs/resources/edit-delete-devices.png)
-
-### Login using registered devices
-
-The login experience differs depending on what type of authentication flow you configured 
-(see [Configure Authentication Flows](#configure-authentication-flows)).
-
-#### Login with passwordless flow
-
-1. Access `/realms/master/hanko/status` (replace **master** with your realm name if necessary). The browser will
-display the configured username form:
-
-    <img alt="Username form" src="./docs/resources/username-form.png" width="350">
-2. Enter a username or email and submit the form.
-3. If
-    - you last registered/logged in with an authenticator app this authentication type will be automatically 
-    selected and the bound device will receive a notification. The 
-    browser will display the following view:
-        <img alt="Logging in with authenticator app" src="./docs/resources/login-pwless-auth.png" width="350">
-    - you last registered/logged in with a security key or platform authenticator this authentication type will be automatically 
-    selected. The browser will display the following view and prompt for an authentication gesture:
-        <img alt="Logging in with WebAuthn" src="./docs/resources/login-pwless-webauthn.png" width="350">
-
-You can switch to a different authentication method by using the "Authenticator"/"Webauthn" button in the respective 
-views.
-
-#### Login with passwordless flow with password fallback
-
-1. Access `/realms/master/hanko/status` (replace **master** with your realm name if necessary). The browser will
-display the configured username form:
-
-    <img alt="Username form" src="./docs/resources/username-form.png" width="350">
-2. Enter a username or email and submit the form.
-3. Enter a password or select "Try another way" to choose a different authentication method:
-    <img alt="Logging in with password" src="./docs/resources/login-password-multi.png" width="350">
-4. Select "Hanko Authenticator/WebAuthn" if you do not want to use a password:
-    <img alt="Login authentication type selection" src="./docs/resources/login-multi-select.png" width="350">
-5. If
-    - you last registered/logged in with an authenticator app this authentication type will be automatically 
-    selected and the bound device will receive a notification. The 
-    browser will display the following view:
-        <img alt="Logging in with authenticator app" src="./docs/resources/login-pwless-auth.png" width="350">
-    - you last registered/logged in with a security key or platform authenticator this authentication type will be automatically 
-    selected. The browser will display the following view and prompt for an authentication gesture:
-        <img alt="Logging in with WebAuthn" src="./docs/resources/login-pwless-webauthn.png" width="350">
-        
-
-You can switch to a different authentication method by using the "Authenticator"/"Webauthn" button in the respective 
-views.
-
-## Using enrollment
-
-As a (master) realm administrator you can:
-
-- register security keys for other users.
-- initiate device registration via Hanko Authenticator for other users. Once you have initiated registration you can use 
-a generated QR code to deliver to your users for registration with a mobile device using an authenticator app.
-
-### Who can enroll other users?
-
-Only users with specific roles can enroll other users:
-
-- As a master realm user with the role **admin** you can enroll users in other realms.
-- As an admin of a realm other than **master** you can enroll only users of your own realm. To create an admin user for
-your realm:
-    1. Create a regular user in a realm:
-        - Navigate to the administration console, log in, and select the realm of your choice (realms can be selected
-        using a dropdown in the top left of the administration console sidebar).
-        - In the administration console sidebar go to **Manage** -> **Users** -> **Add user** (button in the top right).
-        - Fill in the required fields and press the **Save** button.
-    2. Once redirected to the user details of the newly created user, open the **Credentials** tab and set a password 
-    (set the slider **Temporary** to **off**).
-    3. Open the **Role Mapping** tab:
-        - Select **realm-management** under **Client Roles**.
-        - Select all available roles and press **Add selected**.
-    4. Go to `/admin/<REALM_NAME>/console` (replace <REALM_NAME> with the name of the realm in which you created 
-    the user) and login.
-    5. You should see administration console UI only for this realm.
-
-
-> :warning: **WARNING**: In order to enroll a user from a specific realm the realm of this user  **must** have a 
-> **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow 
-> (see [Configure Authentication Flows](#configure-authentication-flows)).
-
-### Enrolling users 
-
-To add a new user and register a device/devices for this user leveraging the enrollment feature:
-
-1. Select the realm in which you want to enroll a user (realms can be selected using a dropdown in the top left of the 
-administration console sidebar).
-2. Select **Users** in the **Manage** section of the sidebar. 
-3. Select **Add User** in the top right of the displayed table.
-4. Enter user data and save.
-5. If you are not redirected to the user details of the newly created user, select **Users** in the **Manage** 
-section of the sidebar and select "View All Users" in the upper left of the table. Select the previously created user.
-6. Select the **Hanko Enrollment** Tab. The following screenshot shows the enrollment tab for a master realm admin user 
-(**Hanko**) who wants to enroll a user **Maxmustermann** in the **Test** realm:
-    ![Hanko Enrollment tab](./docs/resources/enrollment.png)
-7. To add 
-    - _a security key_: select **Add** under **Add a security key**. You will be prompted to attach the security to your
-    device. You then need to perform an authentication gesture (biometric, PIN) to continue.
-    - _a Hanko Authenticator_: select **Generate** under **Add Hanko Authenticator** to initialize registration and generate
-    a QR code. The displayed QR code can be used by scanning via authenticator app in order to complete the registration. 
-    
-> :warning: **WARNING** Note that the registration process is subject to timeout constraints. The default value for an 
-> initiated registration is 120 seconds. If you want to use registration initialization via QR code generation to - for 
-> example - deliver generated QR codes to users via postal mail, then this timeout is unfeasible. You can increase 
-> the timeout using the Hanko Developer Console (see [Prerequisites](#prerequisites)). 
+> :warning: **WARNING** Note that the registration process is subject to timeout constraints. The default value for an
+> initiated registration is 120 seconds. If you want to use registration initialization via QR code generation to - for
+> example - deliver generated QR codes to users via postal mail, then this timeout is unfeasible. You can increase
+> the timeout using the Hanko Developer Console (see [Prerequisites](#prerequisites)).
 >1. Go to `https://console.hanko.io`.
 >2. Log in to your account.
 >3. Once signed in, click your profile name/icon in the top right and in the dropdown select "Change organization".
@@ -390,11 +225,310 @@ section of the sidebar and select "View All Users" in the upper left of the tabl
 >7. Provide the desired value in the "Registration" input.
 >8. Click "Update Changes".
 
-## Theming the account page
+### Register devices
 
-To modify the existing account page theme, you can change the `main.scss` file in the `hanko-account/src/styles` 
-directory. Once modified, remember to run the build script `build.sh` as described in [Building](#building) to properly
-pre-process the `.scss` file.
+#### Register a WebAuthn device
+
+To register a WebAuthn device/security key you need to perform the following steps:
+
+1. Initialize a reqistration by making a POST request to the **/{realmName}/{userId}/webauthn/register** endpoint, 
+specifying the realm name (`realmName`) and the id of the user (`userId`) you want to register a device for as path 
+parameters. Provide appropriate body for registering a cross-platform device (i.e. security key):
+   
+    ```js
+      const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/register`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer <access_token>`
+        },
+        body: JSON.stringify({
+          authenticatorAttachment: "cross-platform",
+          requireResidentKey: "false",
+          userVerification: "required",
+        })
+      })
+
+      const hankoRequest = await response.json();
+    ```
+   
+    The response is a `HankoRequest`. Its `status` should be `PENDING` at this point. The `request` property
+    contains the stringified credential creation options to pass to the WebAuthn API. 
+
+2. Pass the credential creation options to the WebAuthn API. The WebAuthn API requires some properties of the options 
+to be in a binary format so a conversion step is required. You can use the [hanko-webauthn](https://www.npmjs.com/package/hanko-webauthn)
+package to do so.
+
+    1. First install the package or include the UMD module via script tag from CDN:
+
+        ```shell
+        npm install hanko-webauthn@1.2.0
+        ```
+
+        ```html
+        <script src="https://cdn.jsdelivr.net/npm/hanko-webauthn@1.2.0/dist/umd/index.min.js"></script>
+        ```
+   
+    2. Create a new instance of the `HankoWebAuthn` class:
+
+        ```js
+        import { HankoWebAuthn } from "hanko-webauthn";
+        const hankoWebAuthn = new HankoWebAuthn();
+        ```
+
+        When using the UMD module, the class constructor is available under a global with the name `hankoWebAuthn`, 
+        so creating an instance would be:
+
+        ```html
+        <script>
+            const hankoWebAuthn = new hankoWebAuthn.HankoWebAuthn()
+        </script>
+        ```
+
+    3. Pass the credential options contained in the `request` properties to the `createCredentials` method
+    of the `HankoWebAuthn` instance:
+
+        ```js
+        const webAuthnResponse = await hankoWebAuthn.createCredentials(hankoRequest.request) 
+        ```
+       
+3. Verify the WebAuthn response by making a POST request to the **/{realmName}/{userId}/webauthn/verify** endpoint, 
+ again, specifying the realm name (realmName) and the id of the user (userId) you want to register a device for 
+ as path parameters. Provide the `webAuthnResponse` (see step 2iii) as a body:
+    
+     ```js
+     const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/verify`;
+
+     const response = await fetch(url, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         "Authorization": `Bearer <access_token>`
+       },
+       body: JSON.stringify(webAuthnResponse)
+     })
+
+     const hankoRequest = await response.json();
+     ```
+        
+     The response is again a `HankoRequest`. Its `status` property should be `OK` if the 
+     verification was successful.
+
+> **Note**
+> You can also use the `hanko-webauthn` package to check whether the browser is WebAuthn capable
+using the `isWebAuthnSupported`, `isSecurityKeySupported` methods on the `HankoWebAuthn` instance.
+
+#### Register a UAF device/Authenticator App
+
+To register a UAF device/Authenticator App you need to perform the following steps:
+
+1. Initialize a reqistration by making a `POST` request to the **/{realmName}/{userId}/uaf/register** endpoint, 
+specifying the realm name (`realmName`) and the id of the user (`userId`) you want to register a device for as path 
+parameters.
+
+    ```js
+      const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/register`;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer <access_token>`
+        }
+      })
+
+      const hankoRequest = await response.json();
+    ```
+
+    The response is a `HankoRequest`. Its `status` should be `PENDING` at this point.
+
+2. To immediately display the QR Code associated with the request, extract the QR code source URL from the `links`
+property of the `HankoRequest`:
+
+    ```js
+    const qrCodeURL = hankoRequest.links.find(link => link.rel === "qrcode").href;
+    ```
+
+    You can then use the `qrCodeURL` as the `src` for an `<img>`.
+
+#### Get the status of a UAF device/Authenticator App request
+
+To check the request status and retrieve the QR code (e.g. for display purposes after page reloads/at a later time - e.g. if registration
+timeouts are set to a longer period of time), issue a `GET` request to the **/{realmName}/{userId}/uaf/status** endpoint:
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/status`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer <access_token>`
+    }
+  })
+
+  const hankoRequest = await response.json();
+```
+   
+This fetches the last issued UAF/Authenticator App request issued for the user 
+(see [Register a UAF device/Authenticator App](#register-a-uaf-deviceauthenticator-app), step 1). It returns a 
+`HankoRequest`. The status is available in the status property of the response. The status is `PENDING` as long as there
+has not been any attempt made to verify the request via Authenticator App. It is `OK` once the request has been verified
+through the Authenticator App. It is `FAILED` if the request was explicitly cancelled 
+(see [Cancelling a UAF/Authenticator App request](#cancelling-a-uafauthenticator-app-request)) or if an error 
+occurred during verification.
+
+> **Note**
+> Unlike the WebAuthn registration process, there is no need to manually verify an authenticator response (i.e. similar to 
+> the WebAuthn API response and the posting of the response payload to a verification endpoint). This verification step
+> is done out-of-band by the Authenticator App after the user has scanned the request QR code and approved the request.
+> Hence, to know whether a successful registration has occurred and to properly use/display this information in a client
+> app, it is necessary to retrieve the status of the request as descripted in step 3.
+
+#### Cancel a UAF device/Authenticator App request
+
+To cancel a UAF/Authenticator App request, issue a `DELETE` request to the **/{realmName}/{userId}/uaf/cancel**
+endpoint:
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/cancel`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer <access_token>`
+    }
+  })
+
+  const hankoRequest = await response.json();
+```
+
+The response is a `HankoRequest`. Its `status` property should be `FAILED` on successful cancellation.
+
+### Device management
+
+#### Retrieve devices
+
+To retrieve all registered devices for a user, issue a `GET` request to the 
+**/{realmName}/{userId}/devices** endpoint and provide the realm name (`realmName`) and the id of the user (`userId`)
+you want to retrieve devices for as path parameters:
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Accept": "application/json",
+      "Authorization": `Bearer <access_token>`
+    }
+  })
+
+  const devices = await response.json();
+```
+
+#### Deregister devices
+
+##### Deregister a WebAuthn device
+
+To deregister a WebAuthn device for a user, issue a `DELETE` request to the
+**/{realmName}/{userId}/devices/webauthn/{deviceId}** endpoint and provide the realm name (`realmName`), the id of the user 
+(`userId`) as well as the ID of the device (`deviceId`) you want to deregister as path parameters:
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/webauthn/{deviceId}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer <access_token>`
+    }
+  })
+
+  const devices = await response.json();
+```
+
+##### Deregister a UAF device/Authenticator App
+
+To deregister a UAF/Authenticator App device for a user, issue a `DELETE` request to the
+**/{realmName}/{userId}/devices/uaf/{deviceId}** endpoint and provide the realm name (`realmName`), the id of the user
+(`userId`) as well as the ID of the device (`deviceId`) you want to deregister as path parameters:
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer <access_token>`
+    }
+  })
+
+  const devices = await response.json();
+```
+
+> **Note:**
+> Credential deregistration removes only public credential material on the server side. This means that private 
+> credential material will remain on an authenticator device unless a user explicitly deletes it from the authenticator.
+> How credential material can be removed depends on the model of the authenticator: some manufacturers like Yubico offer
+> dedicated software that provides a device settings UI, allowing for resetting the authenticator device. 
+> Google Chrome's security settings also allow you interact with security keys 
+> (e.g. via entering chrome://settings/securityKeys in the URL bar) and resetting the data on it.
+
+#### Rename devices
+
+##### Rename a WebAuthn device
+
+To rename WebAuthn device for a user, issue a `PUT` request to the
+**/{realmName}/{userId}/devices/webauthn/{deviceId}** endpoint and provide the realm name (`realmName`), the id of the user
+(`userId`) as well as the ID of the device (`deviceId`) you want to rename as path parameters::
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer <access_token>`
+    },
+    body: JSON.stringify({
+      newName: "My WebAuthn device"
+    })
+  })
+
+  const renameResponse = await response.json();
+```
+
+When [retrieving a device](#retrieving-devices) the (new) name is available under the
+`keyName` property.
+
+##### Rename a UAF device/Authenticator App device
+
+To rename a UAF/Authenticator App device for a user, issue a `PUT` request to the
+**/{realmName}/{userId}/devices/uaf/{deviceId}** endpoint and provide the realm name (`realmName`), the id of the user
+(`userId`) as well as the ID of the device (`deviceId`) you want to rename as path parameters::
+
+```js
+  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer <access_token>`
+    },
+    body: JSON.stringify({
+      newName: "My UAF device/Authenticator App"
+    })
+  })
+
+  const renameResponse = await response.json();
+```
+
+When [retrieving a device](#retrieving-devices) the (new) name is available under the
+`keyName` property.
 
 ## License
 

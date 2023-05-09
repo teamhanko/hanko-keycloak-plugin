@@ -9,7 +9,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 public class ProfileProviderFactory implements RealmResourceProviderFactory //, ConfiguredProvider
 {
-    private static final String ID = "hanko";
+    private static final String ID = "hanko_old";
 
     private static ServicesLogger logger = ServicesLogger.LOGGER;
 

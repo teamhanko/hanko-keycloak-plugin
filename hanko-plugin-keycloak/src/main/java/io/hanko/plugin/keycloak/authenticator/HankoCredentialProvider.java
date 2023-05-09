@@ -28,14 +28,10 @@ import org.keycloak.models.cache.OnUserCache;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class HankoCredentialProvider implements CredentialProvider<HankoCredentialModel>, CredentialInputValidator, OnUserCache {
-    private KeycloakSession session;
+    private final KeycloakSession session;
 
     public HankoCredentialProvider(KeycloakSession session) {
         this.session = session;
-    }
-
-    private UserCredentialStore getCredentialStore() {
-        return session.userCredentialManager();
     }
 
     @Override
@@ -50,7 +46,7 @@ public class HankoCredentialProvider implements CredentialProvider<HankoCredenti
             return false;
         }
 
-        return session.userCredentialManager().getStoredCredentialsByTypeStream(realm, user, type).count() > 0;
+        return user.credentialManager().getStoredCredentialsByTypeStream(type).findAny().isPresent();
     }
 
     @Override
@@ -59,16 +55,16 @@ public class HankoCredentialProvider implements CredentialProvider<HankoCredenti
     }
 
     @Override
-    public org.keycloak.credential.CredentialModel createCredential(RealmModel realm, UserModel user, HankoCredentialModel credentialModel) {
+    public CredentialModel createCredential(RealmModel realm, UserModel user, HankoCredentialModel credentialModel) {
         if (credentialModel.getCreatedDate() == null) {
             credentialModel.setCreatedDate(Time.currentTimeMillis());
         }
-        return getCredentialStore().createCredential(realm, user, credentialModel);
+        return user.credentialManager().createStoredCredential(credentialModel);
     }
 
     @Override
     public boolean deleteCredential(RealmModel realm, UserModel user, String credentialId) {
-        return getCredentialStore().removeStoredCredential(realm, user, credentialId);
+        return user.credentialManager().removeStoredCredentialById(credentialId);
     }
 
     @Override

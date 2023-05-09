@@ -9,8 +9,8 @@ export const fetchApi = (
       ? (window as any).keycloakUrl
       : `${process.env.KEYCLOAK_URL}`
 
-    const realm = (window as any).realmId
-      ? (window as any).realmId
+    const realm = (window as any).realmName
+      ? (window as any).realmName
       : `${process.env.KEYCLOAK_REALM}`
 
     keycloak.updateToken(30).success(_ => {

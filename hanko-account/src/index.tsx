@@ -22,8 +22,8 @@ const keycloakUrl =
     : `${process.env.KEYCLOAK_URL}/auth`
 
 const realm =
-  (window as any).realmId !== undefined
-    ? (window as any).realmId
+  (window as any).realmName !== undefined
+    ? (window as any).realmName
     : `${process.env.KEYCLOAK_REALM}`
 
 const keycloak = Keycloak({

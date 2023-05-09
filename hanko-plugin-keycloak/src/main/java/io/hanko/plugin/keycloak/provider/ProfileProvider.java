@@ -34,11 +34,6 @@ public class ProfileProvider extends ResourceProvider {
         super(session);
     }
 
-    @Override
-    public Object getResource() {
-        return this;
-    }
-
     @OPTIONS
     @Path("{any:.*}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,8 +54,7 @@ public class ProfileProvider extends ResourceProvider {
     public Response get() {
         User user = getSessionUser();
 
-        boolean isConfiguredForHanko = session.userCredentialManager().isConfiguredFor(
-                context.getRealm(), user.delegate(), HankoCredentialModel.TYPE);
+        boolean isConfiguredForHanko = user.delegate().credentialManager().isConfiguredFor(HankoCredentialModel.TYPE);
 
         try {
             boolean hasRegisteredDevices = false;
@@ -182,11 +176,11 @@ public class ProfileProvider extends ResourceProvider {
 
             if (hankoRequest.getStatus() == Status.OK) {
 
-                List<org.keycloak.credential.CredentialModel> existingCredentials = session.userCredentialManager().getStoredCredentialsByTypeStream(context.getRealm(), user.delegate(), HankoCredentialModel.TYPE).collect(Collectors.toList());
+                List<org.keycloak.credential.CredentialModel> existingCredentials = user.delegate().credentialManager().getStoredCredentialsByTypeStream(HankoCredentialModel.TYPE).collect(Collectors.toList());
                 if (existingCredentials.isEmpty()) {
                     HankoCredentialModel credentials = new HankoCredentialModel(user.getHankoUserId());
                     credentials.setType(HankoCredentialModel.TYPE);
-                    session.userCredentialManager().createCredential(context.getRealm(), user.delegate(), credentials);
+                    user.delegate().credentialManager().createStoredCredential(credentials);
                 }
 
                 URI uri = context.getUri().getBaseUriBuilder().path("realms").path(context.getRealm().getName()).build();
@@ -219,7 +213,7 @@ public class ProfileProvider extends ResourceProvider {
             return Response.serverError().entity("Could not deregister device.").build();
         }
 
-        session.userCredentialManager().disableCredentialType(context.getRealm(), user.delegate(), HankoCredentialModel.TYPE);
+        user.delegate().credentialManager().disableCredentialType(HankoCredentialModel.TYPE);
         HankoStatusResponse hankoStatusResponse = new HankoStatusResponse(false);
         return Response.ok(hankoStatusResponse).build();
     }
@@ -370,7 +364,7 @@ public class ProfileProvider extends ResourceProvider {
     public Response changePassword(ChangePasswordRequest changePasswordRequest) {
         User user = getSessionUser();
         UserCredentialModel credentials = UserCredentialModel.password(changePasswordRequest.newPassword);
-        session.userCredentialManager().updateCredential(context.getRealm(), user.delegate(), credentials);
+        user.delegate().credentialManager().updateCredential(credentials);
         return Response.ok().type(MediaType.APPLICATION_JSON).build();
     }
 
