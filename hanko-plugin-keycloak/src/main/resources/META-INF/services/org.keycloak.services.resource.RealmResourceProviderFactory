@@ -1,3 +1,2 @@
-io.hanko.plugin.keycloak.provider.ProfileProviderFactory
 io.hanko.plugin.keycloak.provider.EnrollmentResourceProviderFactory
 io.hanko.plugin.keycloak.provider.HankoProviderFactory
