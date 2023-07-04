@@ -212,6 +212,9 @@ An OpenAPI specification for the endpoints can be found in the `/docs` directory
 > **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow
 > (see [Configure Authentication Flows](#configure-authentication-flows)).
 
+> :warning: **WARNING**: The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
+> in the realm of the user they want to perform actions for through the API endpoints.
+
 > :warning: **WARNING** Note that the registration process is subject to timeout constraints. The default value for an
 > initiated registration is 120 seconds. If you want to use registration initialization via QR code generation to - for
 > example - deliver generated QR codes to users via postal mail, then this timeout is unfeasible. You can increase

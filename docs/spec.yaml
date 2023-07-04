@@ -377,7 +377,7 @@ components:
 security:
   - bearerAuth: []
 servers:
-  - url: <keycloak_server_url>/realms/<app_realm_name>/hanko
+  - url: <keycloak_server_url>/admin/realms/<app_realm_name>/hanko
 openapi: 3.0.0
 paths:
   /{realmName}/{userId}/uaf/register:
@@ -764,16 +764,21 @@ info:
     
     Endpoints require an access token/authenticated Keycloak session.
     
+    ### Authorization
+    
+    The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
+    in the realm of the user they want to perform actions for through the API endpoints.
+  
     ### Server/Base URL
     
     The base URL follows the following schema:
     
-    `<keycloak_server_url>/realms/<app_realm_name>/hanko`
+    `<keycloak_server_url>/admin/realms/<app_realm_name>/hanko`
     
     If you have set a value for the Keycloak `http-relative-path` configuration, you need add this value to the 
     path, i.e. if you set the `http-relative-path` to `/auth`:
     
-    `<keycloak_server_url>/auth/realms/<app_realm_name>/hanko`
+    `<keycloak_server_url>/auth/admin/realms/<app_realm_name>/hanko`
     
     where:
     
@@ -781,9 +786,4 @@ info:
     - **app_realm_name** is the realm name your application is a client of
     - **hanko** is the name of the realm resource provider provided by the plugin
 
-    > **Note**:
-    > When retrieving the **keycloak_server_url** through APIs provided by official
-    > Keycloak libraries/adapters, the URL often already contains a trailing slash,
-    > so be careful when constructing request URLs for the plugin by e.g. simply interpolating
-    > a value retrieved in such a way.
   version: 3.0.0

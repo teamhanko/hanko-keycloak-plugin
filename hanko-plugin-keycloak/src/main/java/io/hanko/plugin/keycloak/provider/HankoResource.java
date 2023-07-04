@@ -10,23 +10,22 @@ import io.hanko.sdk.HankoClient;
 import io.hanko.sdk.models.*;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.services.resources.Cors;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-public class HankoProvider extends ResourceProvider {
+public class HankoResource {
 
-    HankoProvider(KeycloakSession session) {
-        super(session);
-    }
+    private final KeycloakSession session;
+    private final AdminPermissionEvaluator auth;
 
-    @OPTIONS
-    @Path("/{realmName}/{userId}/webauthn/register")
-    public Response registerWebAuthnPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("POST").auth().build();
+    public HankoResource(KeycloakSession session, AdminPermissionEvaluator auth) {
+        this.session = session;
+        this.auth = auth;
     }
 
     @POST
@@ -38,14 +37,9 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("userId") String userId,
             AuthenticatorSelectionCriteria authenticatorSelectionCriteria
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("POST")
-                .auth();
+        requireManage(realm, user);
 
         try {
             if (user.getHankoUserId() == null) {
@@ -59,25 +53,19 @@ public class HankoProvider extends ResourceProvider {
             req.setUsername(user.delegate().getUsername());
             req.setUserId(user.getHankoUserId());
             req.setAuthenticatorSelectionCriteria(authenticatorSelectionCriteria);
-            req.setClientData(getContextClientData());
+            req.setClientData(getClientData());
 
             HankoRequest hankoRequest = hankoClient.requestWebAuthnOperation(req);
             user.setEnrollmentWebAuthnRequestId(hankoRequest.getId());
 
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.WEBAUTHN, user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not create Hanko WebAuthn request.");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/webauthn/verify")
-    public Response verifyWebAuthnPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("POST").auth().build();
     }
 
     @POST
@@ -89,33 +77,23 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("userId") String userId,
             String webAuthnResponse)
     {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-        String requestId = user.getEnrollmentWebAuthnRequestId();
+        requireManage(realm, user);
 
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("POST")
-                .auth();
+        String requestId = user.getEnrollmentWebAuthnRequestId();
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
             HankoRequest hankoRequest = hankoClient.validateWebAuthnRequest(requestId, webAuthnResponse);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.verificationFailed(SupportedProtocols.WEBAUTHN, requestId, user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not verify Hanko WebAuthn request.");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/uaf/register")
-    public Response registerUafPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("POST").auth().build();
     }
 
     @POST
@@ -126,14 +104,9 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("realmName") String realmName,
             @PathParam("userId") String userId
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("POST")
-                .auth();
+        requireManage(realm, user);
 
         try {
             if (user.getHankoUserId() == null) {
@@ -146,25 +119,23 @@ public class HankoProvider extends ResourceProvider {
             req.setOperation(Operation.REG);
             req.setUsername(user.delegate().getUsername());
             req.setUserId(user.getHankoUserId());
-            req.setClientData(getContextClientData());
+            req.setClientData(getClientData());
 
             HankoRequest hankoRequest = hankoClient.requestUafOperation(req);
             user.setEnrollmentUafRequestId(hankoRequest.getId());
 
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.UAF, user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not create Hanko UAF request.");
-            return cors.builder(response).build();
+            return response.build();
         }
     }
 
-    @OPTIONS
-    @Path("/{realmName}/{userId}/uaf/status")
-    public Response getUafRequestPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("GET").auth().build();
+    private void requireManage(RealmModel realm, User user) {
+        AdminPermissions.evaluator(session, realm, auth.adminAuth()).users().requireManage(user.delegate());
     }
 
     @GET
@@ -175,33 +146,23 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("realmName") String realmName,
             @PathParam("userId") String userId
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-        String requestId = user.getEnrollmentUafRequestId();
+        requireManage(realm, user);
 
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("GET")
-                .auth();
+        String requestId = user.getEnrollmentUafRequestId();
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
             HankoRequest hankoRequest = hankoClient.getUafRequest(requestId);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.UAF, user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not get Hanko UAF request.");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/uaf/cancel")
-    public Response cancelUafPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("DELETE").auth().build();
     }
 
     @DELETE
@@ -212,33 +173,23 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("realmName") String realmName,
             @PathParam("userId") String userId
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-        String requestId = user.getEnrollmentUafRequestId();
+        requireManage(realm, user);
 
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("DELETE")
-                .auth();
+        String requestId = user.getEnrollmentUafRequestId();
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
             HankoRequest hankoRequest = hankoClient.cancelUafRequest(requestId);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (ConfigException ex) {
             HankoLogger.uafCancelRequestFailed(user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not cancel Hanko UAF request.");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/devices")
-    public Response getDevicesPreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("GET").auth().build();
     }
 
     @GET
@@ -248,32 +199,21 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("realmName") String realmName,
             @PathParam("userId") String userId)
     {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("GET")
-                .auth();
+        requireManage(realm, user);
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
             Device[] devices = hankoClient.getRegisteredDevices(user.getHankoUserId());
             Response.ResponseBuilder response = Response.ok(devices);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.getRegisteredDevicesFailed(user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not retrieve user's devices");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/devices/uaf/{deviceId}")
-    public Response uafDevicePreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("DELETE", "PUT").auth().build();
     }
 
     @DELETE
@@ -285,14 +225,9 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("userId") String userId,
             @PathParam("deviceId") String deviceId
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("DELETE")
-                .auth();
+        requireManage(realm, user);
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
@@ -301,17 +236,17 @@ public class HankoProvider extends ResourceProvider {
             req.setOperation(Operation.DEREG);
             req.setUsername(user.delegate().getUsername());
             req.setUserId(user.getHankoUserId());
-            req.setClientData(getContextClientData());
+            req.setClientData(getClientData());
             req.setDeviceIds(new String[]{deviceId});
 
             HankoRequest hankoRequest = hankoClient.requestUafOperation(req);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.deregistrationFailed(SupportedProtocols.UAF, user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not deregister device.");
-            return cors.builder(response).build();
+            return response.build();
         }
     }
 
@@ -325,32 +260,25 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("deviceId") String deviceId,
             RenameDevice renameDevice
     ) {
-        User sessionUser = getSessionUser();
+        return renameDevice(realmName, userId, deviceId, renameDevice);
+    }
+
+    private Response renameDevice(String realmName, String userId, String deviceId, RenameDevice renameDevice) {
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("PUT")
-                .auth();
+        requireManage(realm, user);
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
             RenameDevice renameResponse = hankoClient.renameDevice(deviceId, renameDevice);
             Response.ResponseBuilder response = Response.ok(renameResponse);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.renameDeviceFailed(user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not rename device.");
-            return cors.builder(response).build();
+            return response.build();
         }
-    }
-
-    @OPTIONS
-    @Path("/{realmName}/{userId}/devices/webauthn/{deviceId}")
-    public Response webauthnDevicePreflight() {
-        return Cors.add(request, Response.ok()).preflight().allowedMethods("DELETE", "PUT").auth().build();
     }
 
     @DELETE
@@ -362,14 +290,9 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("userId") String userId,
             @PathParam("deviceId") String deviceId
     ) {
-        User sessionUser = getSessionUser();
         RealmModel realm = session.realms().getRealmByName(realmName);
         User user = UserFactory.getUser(session, userId, realm);
-
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("DELETE")
-                .auth();
+        requireManage(realm, user);
 
         try {
             HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
@@ -378,17 +301,17 @@ public class HankoProvider extends ResourceProvider {
             req.setOperation(Operation.DEREG);
             req.setUsername(user.delegate().getUsername());
             req.setUserId(user.getHankoUserId());
-            req.setClientData(getContextClientData());
+            req.setClientData(getClientData());
             req.setDeviceIds(new String[]{deviceId});
 
             HankoRequest hankoRequest = hankoClient.requestWebAuthnOperation(req);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
-            return cors.builder(response).build();
+            return response.build();
         } catch (Exception ex) {
             HankoLogger.deregistrationFailed(SupportedProtocols.WEBAUTHN, user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not deregister device.");
-            return cors.builder(response).build();
+            return response.build();
         }
     }
 
@@ -402,25 +325,13 @@ public class HankoProvider extends ResourceProvider {
             @PathParam("deviceId") String deviceId,
             RenameDevice renameDevice
     ) {
-        User sessionUser = getSessionUser();
-        RealmModel realm = session.realms().getRealmByName(realmName);
-        User user = UserFactory.getUser(session, userId, realm);
+        return renameDevice(realmName, userId, deviceId, renameDevice);
+    }
 
-        Cors cors = new Cors(request)
-                .allowedOrigins(getAccessToken(session))
-                .allowedMethods("PUT")
-                .auth();
-
-        try {
-            HankoClient hankoClient = HankoClientFactory.getHankoClient(realm);
-            RenameDevice renameResponse = hankoClient.renameDevice(deviceId, renameDevice);
-            Response.ResponseBuilder response = Response.ok(renameResponse);
-            return cors.builder(response).build();
-        } catch (Exception ex) {
-            HankoLogger.renameDeviceFailed(user, deviceId, ex);
-            Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not rename device.");
-            return cors.builder(response).build();
-        }
+    private ClientData getClientData() {
+        String remoteAddress = session.getContext().getConnection().getRemoteAddr();
+        ClientData clientData = new ClientData();
+        clientData.setRemoteAddress(remoteAddress);
+        return clientData;
     }
 }
