@@ -7,7 +7,7 @@ For more information about Keycloak, please visit the [Keycloak homepage](https:
 ## Features
 
 - Log in with either password, Hanko Authenticator (FIDO UAF) or WebAuthn (FIDO2).
-- Enrollment of users via provided extension endpoints - "pre"-register FIDO2 roaming authenticators (security keys)
+- Enrollment of users via provided Keycloak admin API extension endpoints - "pre"-register FIDO2 roaming authenticators (security keys)
 or initiate device binding using the Hanko Authenticator.
 
 ## Table of contents
@@ -239,7 +239,7 @@ specifying the realm name (`realmName`) and the id of the user (`userId`) you wa
 parameters. Provide appropriate body for registering a cross-platform device (i.e. security key):
    
     ```js
-      const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/register`;
+      const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/register`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -302,7 +302,7 @@ package to do so.
  as path parameters. Provide the `webAuthnResponse` (see step 2iii) as a body:
     
      ```js
-     const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/verify`;
+     const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/webauthn/verify`;
 
      const response = await fetch(url, {
        method: "POST",
@@ -332,7 +332,7 @@ specifying the realm name (`realmName`) and the id of the user (`userId`) you wa
 parameters.
 
     ```js
-      const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/register`;
+      const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/register`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -362,7 +362,7 @@ To check the request status and retrieve the QR code (e.g. for display purposes 
 timeouts are set to a longer period of time), issue a `GET` request to the **/{realmName}/{userId}/uaf/status** endpoint:
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/status`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/status`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -396,7 +396,7 @@ To cancel a UAF/Authenticator App request, issue a `DELETE` request to the **/{r
 endpoint:
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/cancel`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/uaf/cancel`;
 
   const response = await fetch(url, {
     method: "DELETE",
@@ -420,7 +420,7 @@ To retrieve all registered devices for a user, issue a `GET` request to the
 you want to retrieve devices for as path parameters:
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices`;
 
   const response = await fetch(url, {
     method: "GET",
@@ -442,7 +442,7 @@ To deregister a WebAuthn device for a user, issue a `DELETE` request to the
 (`userId`) as well as the ID of the device (`deviceId`) you want to deregister as path parameters:
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/webauthn/{deviceId}`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/webauthn/{deviceId}`;
 
   const response = await fetch(url, {
     method: "DELETE",
@@ -461,7 +461,7 @@ To deregister a UAF/Authenticator App device for a user, issue a `DELETE` reques
 (`userId`) as well as the ID of the device (`deviceId`) you want to deregister as path parameters:
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
 
   const response = await fetch(url, {
     method: "DELETE",
@@ -490,7 +490,7 @@ To rename WebAuthn device for a user, issue a `PUT` request to the
 (`userId`) as well as the ID of the device (`deviceId`) you want to rename as path parameters::
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
 
   const response = await fetch(url, {
     method: "PUT",
@@ -515,7 +515,7 @@ To rename a UAF/Authenticator App device for a user, issue a `PUT` request to th
 (`userId`) as well as the ID of the device (`deviceId`) you want to rename as path parameters::
 
 ```js
-  const url = `<keycloak_server_url>/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
 
   const response = await fetch(url, {
     method: "PUT",
