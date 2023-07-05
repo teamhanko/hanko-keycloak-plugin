@@ -12,16 +12,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-public class HankAuthResourceProvider implements RealmResourceProvider {
+public class HankoAuthResourceProvider implements RealmResourceProvider {
 
     private final KeycloakSession session;
 
-    public HankAuthResourceProvider(KeycloakSession session) {
+    public HankoAuthResourceProvider(KeycloakSession session) {
         this.session = session;
     }
 
     @GET
-    @Path("request/{requestId}")
+    @Path("requests/{requestId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getStatus(@PathParam("requestId") String requestId) {
         try {

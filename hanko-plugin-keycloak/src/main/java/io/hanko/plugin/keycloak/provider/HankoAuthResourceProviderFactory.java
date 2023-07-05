@@ -9,7 +9,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 public class HankoAuthResourceProviderFactory implements RealmResourceProviderFactory, RealmResourceProvider {
     @Override
     public RealmResourceProvider create(KeycloakSession session) {
-        return new HankAuthResourceProvider(session);
+        return new HankoAuthResourceProvider(session);
     }
 
     @Override
