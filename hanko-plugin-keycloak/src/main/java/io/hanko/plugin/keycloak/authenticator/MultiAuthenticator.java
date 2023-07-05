@@ -206,7 +206,7 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
     }
 
     private void renderChallenge(LoginMethod loginMethod, AuthenticationFlowContext context, AuthenticationFlowError error) {
-        User user = new User(context.getUser());
+            User user = new User(context.getUser());
 
         List<Device> devices = getDevices(context);
         String userId = user.getHankoUserId();
