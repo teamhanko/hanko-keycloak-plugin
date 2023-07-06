@@ -495,7 +495,7 @@ To rename WebAuthn device for a user, issue a `PUT` request to the
 (`userId`) as well as the ID of the device (`deviceId`) you want to rename as path parameters::
 
 ```js
-  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/uaf/{deviceId}`;
+  const url = `<keycloak_server_url>/admin/realms/<your_client_app_realm>/hanko/{realmName}/{userId}/devices/webauthn/{deviceId}`;
 
   const response = await fetch(url, {
     method: "PUT",
