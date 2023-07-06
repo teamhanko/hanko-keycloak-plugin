@@ -533,7 +533,7 @@ paths:
       description: |
         Verifies the last issued WebAuthn registration request using the response from the WebAuthn API.
         
-                See [here](https://github.com/teamhanko/hanko-keycloak-plugin#register-a-webauthn-device) for details.
+        See [here](https://github.com/teamhanko/hanko-keycloak-plugin#register-a-webauthn-device) for details.
       parameters:
         - name: realmName
           schema:
