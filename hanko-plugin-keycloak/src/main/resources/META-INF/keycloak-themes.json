@@ -2,7 +2,7 @@
     "themes": [
         {
             "name" : "keycloak-with-hanko",
-            "types": [ "account", "admin", "login" ]
+            "types": [ "account", "login" ]
         },
         {
             "name" : "kvsh",

@@ -29,7 +29,7 @@
             <script src="${url.resourcesPath}/js/hanko.js"></script>
             <script>
                 const awaitLoginComplete = () => {
-                    fetchWithTimeout(() => fetch('${baseUrl}realms/${realm.name}/hanko/request/${requestId}'))
+                    fetchWithTimeout(() => fetch('${baseUrl}/realms/${realm.name}/hanko-auth/requests/${requestId}'))
                             .then(response => response.json())
                             .catch(error => {
                                 console.error('Error:', error)

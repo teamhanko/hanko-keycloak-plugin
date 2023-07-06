@@ -1,0 +1,789 @@
+components:
+  schemas:
+    models.RelyingParty:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        appId:
+          type: string
+        icon:
+          type: string
+      required:
+        - id
+        - name
+        - appId
+        - icon
+    models.Link:
+      properties:
+        rel:
+          type: string
+        method:
+          type: string
+        href:
+          type: string
+      required:
+        - rel
+        - method
+        - href
+    models.ClientData:
+      properties:
+        remoteAddress:
+          type: string
+        userAgent:
+          type: string
+    models.UserVerification:
+      type: string
+      enum:
+        - preferred
+        - required
+        - discouraged
+    models.RenameDevice:
+      properties:
+        newName:
+          type: string
+      required:
+        - newName
+    models.WebAuthnRegResponse:
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+        type:
+          type: string
+        response:
+          $ref: '#/components/schemas/models.RegResponse'
+      required:
+        - id
+        - rawId
+        - type
+        - response
+    models.Location:
+      properties:
+        country:
+          type: string
+        region:
+          type: string
+        city:
+          type: string
+      required:
+        - country
+        - region
+        - city
+    models.HankoRequest:
+      properties:
+        id:
+          type: string
+        operation:
+          type: string
+          enum:
+            - AUTH
+            - DEREG
+            - REG
+        username:
+          type: string
+        userId:
+          type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - OK
+            - FAILED
+            - INVALIDATED
+        createdAt:
+          format: date-time
+          type: string
+        validUntil:
+          format: date-time
+          type: string
+        relyingParty:
+          $ref: '#/components/schemas/models.RelyingParty'
+        clientData:
+          $ref: '#/components/schemas/models.ClientData'
+        location:
+          $ref: '#/components/schemas/models.Location'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/models.Link'
+        transaction:
+          type: string
+        request:
+          type: string
+        deviceID:
+          type: string
+        device:
+          $ref: '#/components/schemas/models.RequestDevice'
+        isSecondFactorOnly:
+          type: boolean
+        error:
+          $ref: '#/components/schemas/models.RequestError'
+      required:
+        - id
+        - operation
+        - username
+        - userId
+        - status
+        - createdAt
+        - validUntil
+        - relyingParty
+        - links
+        - request
+        - deviceID
+    models.AuthResponse:
+      properties:
+        clientDataJSON:
+          type: string
+        signature:
+          type: string
+        authenticatorData:
+          type: string
+        userHandle:
+          type: string
+      required:
+        - clientDataJSON
+        - signature
+        - authenticatorData
+        - userHandle
+    models.CreateRequest:
+      properties:
+        operation:
+          type: string
+          enum:
+            - AUTH
+            - DEREG
+            - REG
+        username:
+          type: string
+        userId:
+          type: string
+        displayName:
+          type: string
+        clientData:
+          $ref: '#/components/schemas/models.ClientData'
+        transaction:
+          type: string
+        deviceIds:
+          type: array
+          items:
+            type: string
+        authenticatorSelectionCriteria:
+          $ref: '#/components/schemas/models.AuthenticatorSelectionCriteria'
+        attestationConveyancePreference:
+          type: string
+          enum:
+            - direct
+            - indirect
+            - none
+        isSecondFactorOnly:
+          type: boolean
+      required:
+        - operation
+    models.RequestError:
+      properties:
+        code:
+          type: integer
+          format: int32
+        reason:
+          type: string
+      required:
+        - code
+    models.AuthenticatorSelectionCriteria:
+      properties:
+        authenticatorAttachment:
+          $ref: "#/components/schemas/models.AuthenticatorAttachment"
+        requireResidentKey:
+          type: boolean
+        userVerification:
+          $ref: "#/components/schemas/models.UserVerification"
+      example:
+        authenticatorAttachment: "cross-platform"
+        requireResidentKey: false
+        userVerification: "required"
+    models.RegResponse:
+      properties:
+        clientDataJSON:
+          type: string
+        attestationObject:
+          type: string
+      required:
+        - clientDataJSON
+        - attestationObject
+    models.Device:
+      properties:
+        deviceId:
+          type: string
+        keyName:
+          type: string
+        authenticatorType:
+          type: string
+          enum:
+            - WEBAUTHENTICATION
+            - FIDO_UAF
+        lastUsage:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        authenticatorAttachment:
+          $ref: "#/components/schemas/models.AuthenticatorAttachment"
+        isSecondFactorOnly:
+          type: boolean
+        deviceOs:
+          type: string
+        osVersion:
+          type: string
+      required:
+        - deviceId
+        - keyName
+        - authenticatorType
+        - lastUsage
+        - createdAt
+    models.WebAuthnRegValidationRequest:
+      properties:
+        webAuthnResponse:
+          $ref: '#/components/schemas/models.WebAuthnRegResponse'
+      required:
+        - webAuthnResponse
+    models.AuthenticatorAttachment:
+      type: string
+      enum:
+        - cross-platform
+        - platform
+    models.RequestDevice:
+      properties:
+        deviceId:
+          type: string
+        keyName:
+          type: string
+  requestBodies:
+    HankoWebAuthnRegRequest:
+      description: The description
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.AuthenticatorSelectionCriteria'
+    HankoCreateOperationRequest:
+      description: The description
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.CreateRequest'
+    WebAuthnRegValidationRequest:
+      description: The description
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.WebAuthnRegValidationRequest'
+    RenameDevice:
+      description: The new device name
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.RenameDevice'
+  responses:
+    Default201Success:
+      description: Successfully created new resource.
+    Default204Success:
+      description: Service has successfully fulfilled your request.
+    Default401Error:
+      description: User/access token bearer is unauthorized.
+    Default403Error:
+      description: User/access token bearer action is forbidden.
+    Default500Error:
+      description: Internal Server Error.
+      content:
+        application/json:
+          schema:
+            type: string
+            description: An error message describing the error
+    Devices:
+      description: The registered Devices
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/models.Device'
+    HankoUafRequestWithLinks:
+      description: The HankoRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.HankoRequest'
+      links:
+        Validate:
+          $ref: '#/components/links/Validate'
+        Get:
+          $ref: '#/components/links/Get'
+        Cancel:
+          $ref: '#/components/links/Cancel'
+        QrCode:
+          $ref: '#/components/links/QrCode'
+    HankoUafRequestWithoutQrCode:
+      description: The HankoRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/models.HankoRequest'
+      links:
+        Validate:
+          $ref: '#/components/links/Validate'
+        Get:
+          $ref: '#/components/links/Get'
+        Cancel:
+          $ref: '#/components/links/Cancel'
+  links:
+    Validate:
+      description: Validate the request in the `HankoRequest` from the previous response
+      operationId: validate
+      parameters:
+        id: $response.body#/id
+    Get:
+      description: Get the current status for the operation identified by the provided id
+      operationId: status
+      parameters:
+        id: $response.body#/id
+    Cancel:
+      description: Cancel the operation identified by the provided id
+      operationId: cancel
+      parameters:
+        id: $response.body#/id
+    QrCode:
+      description: Get a QR code for a request identified by the provided id
+      operationId: qrcode
+      parameters:
+        id: $response.body#/id
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    StringIdentifier:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+      description: General identifier used to describe a specific resource
+security:
+  - bearerAuth: []
+servers:
+  - url: <keycloak_server_url>/admin/realms/<app_realm_name>/hanko
+openapi: 3.0.0
+paths:
+  /{realmName}/{userId}/uaf/register:
+    post:
+      summary: Initialize a UAF/Authenticator App registration request
+      operationId: createUaf
+      description: |
+        Initializes a UAF/Authenticator App registration with the Hanko API for the given realm and user. Returns a HankoRequest.
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to register a UAF credential/Authenticator App device for.
+
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: The Keycloak ID of the user you want to register a UAF credential/Authenticator App device for.
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithLinks'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      tags:
+        - Hanko Authenticator
+  /{realmName}/{userId}/uaf/status:
+    get:
+      summary: Get the status of the most recent UAF/Authenticator App request
+      operationId: get
+      description: |
+        Get the the most recent UAF/Authenticator App request
+        for the given realm and user. 
+        
+        The status is available in the `status` property
+        of the response. The status is `PENDING` as long as there has not been any attempt
+        made to verify the request via Authenticator App. It is `OK` once the request has been verified
+        through the Authenticator App. It is `FAILED` if the request was explicitly cancelled (
+        see [/{realmName}/{userId}/uaf/cancel](#/Hanko%20Authenticator/cancel))
+        or if an error occurred during verification.
+
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithLinks'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+      tags:
+        - Hanko Authenticator
+  /{realmName}/{userId}/uaf/cancel:
+    delete:
+      summary: Cancel the most recent UAF/Authenticator app request
+      operationId: cancel
+      description: |
+        Cancel the most recent UAF/Authenticator app request for the given realm and user. If the cancellation request
+        was successful, the `status` property of the response is set to `FAILED`.
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithLinks'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+      tags:
+        - Hanko Authenticator
+  /{realmName}/{userId}/webauthn/register:
+    post:
+      summary: Initialize a WebAuthn registration.
+      requestBody:
+        $ref: '#/components/requestBodies/HankoWebAuthnRegRequest'
+      operationId: createWebAuthn
+      description: |
+        Initializes a WebAuthn registration with the Hanko API for the given realm and user. 
+        Returns a `HankoRequest`. The `HankoRequest` contains credential creation options as a string in the `request` 
+        property. This string must be passed to the WebAuthn API in order to create a credential.
+        
+        See [here](https://github.com/teamhanko/hanko-keycloak-plugin#register-a-webauthn-device) for details.
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to register a WebAuthn credential for.
+            
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: The Keycloak ID of the user you want to register a WebAuthn credential for
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithoutQrCode'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      tags:
+        - Web Authentication
+  /{realmName}/{userId}/webauthn/verify:
+    post:
+      summary: Verify a WebAuthn API registration/credential creation response with the Hanko API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/models.WebAuthnRegValidationRequest'
+      operationId: validateWebAuthnRequest
+      description: |
+        Verifies the last issued WebAuthn registration request using the response from the WebAuthn API.
+        
+        See [here](https://github.com/teamhanko/hanko-keycloak-plugin#register-a-webauthn-device) for details.
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to register a WebAuthn credential for.
+
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: The Keycloak ID of the user you want to register a WebAuthn credential for
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithoutQrCode'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      tags:
+        - Web Authentication
+  /{realmName}/{userId}/devices:
+    get:
+      summary: Get all registered devices
+      operationId: getUserDevices
+      description: |
+        Get all devices for a given realm and user.
+      responses:
+        '200':
+          $ref: '#/components/responses/Devices'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+      tags:
+        - Device Management
+  /{realmName}/{userId}/devices/uaf/{deviceId}:
+    put:
+      summary: Change the name of a UAF/Authenticator app device
+      requestBody:
+        $ref: '#/components/requestBodies/RenameDevice'
+      operationId: renameUafDevice
+      responses:
+        '200':
+          $ref: '#/components/requestBodies/RenameDevice'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to rename a UAF device for
+
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The Keycloak ID of the user you want to rename a UAF device for
+        - name: deviceId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The ID of the device to rename
+      tags:
+        - Device Management
+    delete:
+      summary: Deregister a UAF/Authenticator App device
+      operationId: deregisterUafDevice
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithLinks'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to deregister a UAF device for
+            
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The Keycloak ID of the user you want to deregister a UAF device for
+        - name: deviceId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The ID of the device to deregister
+      tags:
+        - Device Management
+  /{realmName}/{userId}/devices/webauthn/{deviceId}:
+    put:
+      summary: Change the name of a WebAuthn device
+      requestBody:
+        $ref: '#/components/requestBodies/RenameDevice'
+      operationId: renameWebAuthnDevice
+      responses:
+        '200':
+          $ref: '#/components/requestBodies/RenameDevice'
+        '401':
+          $ref: '#/components/responses/Default401Error'
+        '403':
+          $ref: '#/components/responses/Default403Error'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to rename a WebAuthn device for
+            
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The Keycloak ID of the user you want to rename a WebAuthn device for
+        - name: deviceId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The ID of the device to deregister
+      tags:
+        - Device Management
+    delete:
+      summary: Deregister a WebAuthn device
+      operationId: deregisterWebAuthnDevice
+      responses:
+        '200':
+          $ref: '#/components/responses/HankoUafRequestWithoutQrCode'
+        '500':
+          $ref: '#/components/responses/Default500Error'
+      parameters:
+        - name: realmName
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The realm name (not ID) of the user you want to deregister a WebAuthn device for
+            
+            **NOTE**: The Keycloak Admin Console displays the realm under `Realm Settings` but labels it
+            as the `Realm ID`. It is in fact the realm name and not the internal/database ID of the realm.
+        - name: userId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The Keycloak ID of the user you want to deregister a WebAuthn device for
+        - name: deviceId
+          schema:
+            type: string
+          in: path
+          required: true
+          description: |
+            The ID of the device to deregister
+      tags:
+        - Device Management
+tags:
+  - name: Web Authentication
+    description: Authentication via W3C WebAuthentication
+  - name: Hanko Authenticator
+    description: Authentication with the Hanko Authenticator and FIDO UAF (out-of-band style)
+  - name: Device Management
+    description: Manage the Devices of your users
+info:
+  title: Hanko Keycloak Plugin API
+  description: |
+    Tested with Keycloak 21.1.1
+    
+    ### Authentication
+    
+    Endpoints require an access token/authenticated Keycloak session.
+    
+    ### Authorization
+    
+    The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
+    in the realm of the user they want to perform actions for through the API endpoints.
+  
+    ### Server/Base URL
+    
+    The base URL follows the following schema:
+    
+    `<keycloak_server_url>/admin/realms/<app_realm_name>/hanko`
+    
+    If you have set a value for the Keycloak `http-relative-path` configuration, you need add this value to the 
+    path, i.e. if you set the `http-relative-path` to `/auth`:
+    
+    `<keycloak_server_url>/auth/admin/realms/<app_realm_name>/hanko`
+    
+    where:
+    
+    - **keycloak_server_url** is the base server URL of you Keycloak instance
+    - **app_realm_name** is the realm name your application is a client of
+    - **hanko** is the name of the realm resource provider provided by the plugin
+
+  version: 3.0.0

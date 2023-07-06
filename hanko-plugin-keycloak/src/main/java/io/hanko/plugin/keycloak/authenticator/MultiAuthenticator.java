@@ -136,7 +136,7 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
         URI uri = authenticationFlowContext.getUriInfo().getBaseUriBuilder().path("realms").path(authenticationFlowContext.getRealm().getName()).build();
         int maxCookieAge = 60 * 60 * 24 * 365; // 365 days
         CookieHelper.addCookie("LOGIN_METHOD", loginMethod.name(), uri.getRawPath(), null, null,
-                maxCookieAge, false, true);
+                maxCookieAge, false, true, authenticationFlowContext.getSession());
     }
 
     private void cancelLogin(AuthenticationFlowContext context) {
@@ -172,8 +172,8 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
         User user = new User(context.getUser());
         String hankoUserId = user.getHankoUserId();
 
-        boolean preferWebauthn = CookieHelper.getCookieValue("LOGIN_METHOD").contains(LoginMethod.WEBAUTHN.name());
-        boolean preferUaf = CookieHelper.getCookieValue("LOGIN_METHOD").contains(LoginMethod.UAF.name());
+        boolean preferWebauthn = CookieHelper.getCookieValue(context.getSession(), "LOGIN_METHOD").contains(LoginMethod.WEBAUTHN.name());
+        boolean preferUaf = CookieHelper.getCookieValue(context.getSession(), "LOGIN_METHOD").contains(LoginMethod.UAF.name());
         //boolean preferPassword = CookieHelper.getCookieValue("LOGIN_METHOD").contains(LoginMethod.PASSWORD.name());
 
         if (hankoUserId == null || hankoUserId.trim().isEmpty()) {
@@ -206,7 +206,7 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
     }
 
     private void renderChallenge(LoginMethod loginMethod, AuthenticationFlowContext context, AuthenticationFlowError error) {
-        User user = new User(context.getUser());
+            User user = new User(context.getUser());
 
         List<Device> devices = getDevices(context);
         String userId = user.getHankoUserId();

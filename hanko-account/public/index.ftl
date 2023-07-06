@@ -6,6 +6,7 @@
   <script>
     window.keycloakUrl = "${keycloakUrl!}";
     window.realmId = "${keycloakRealmId!}";
+    window.realmName = "${keycloakRealm!}";
     window.resourceBaseUrl = '${url.resourcesPath}/js/';
     <#--window.requires2fa = "${requires2fa}";-->
   </script>
