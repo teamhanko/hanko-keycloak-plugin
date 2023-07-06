@@ -521,7 +521,7 @@ paths:
       tags:
         - Web Authentication
   /{realmName}/{userId}/webauthn/verify:
-    put:
+    post:
       summary: Verify a WebAuthn API registration/credential creation response with the Hanko API
       requestBody:
         required: true
