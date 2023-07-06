@@ -123,7 +123,8 @@ API Key ID/API Key pair to make authorized requests. In order to obtain an API K
 This will generate an API Key and an API Key ID. You should store the API Key securely since it cannot be obtained once
 you confirm and close the modal displayed after key generation.
 
-> :warning: WARNING: Do not make the API Key publicly available.
+> **Warning**
+> Do not make the API Key publicly available.
 
 The API Key ID/API Key pair will be used to configure Keycloak authentication flows (see the following sections for
 details).
@@ -153,7 +154,8 @@ an alias for the configuration as well as your API Key ID and API Key secret. Sa
 12. Open the **Bindings** tab and change the **Browser Flow** to **Browser flow with Hanko**. Save the configuration.
     ![Change Binding](./docs/resources/change-binding.png)
     
-> :warning: **WARNING**: Be careful when applying this authentication configuration to the master realm. Using this 
+> **Warning**
+> Be careful when applying this authentication configuration to the master realm. Using this 
 > configuration a user **must** have a device registered in order to properly log in. If you are a master realm admin 
 > user without registered devices and apply this configuration as your bound browser flow, you can lock yourself out of
 > the administration console. You can register devices using the enrollment feature. See 
@@ -208,14 +210,17 @@ An OpenAPI specification for the endpoints can be found in the `/docs` directory
 
 ### Preliminary notes
 
-> :warning: **WARNING**: In order to register a device for a user from a specific realm said realm  **must** have a
+> **Note** 
+> In order to register a device for a user from a specific realm said realm  **must** have a
 > **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow
 > (see [Configure Authentication Flows](#configure-authentication-flows)).
 
-> :warning: **WARNING**: The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
+> **Note**
+> The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
 > in the realm of the user they want to perform actions for through the API endpoints.
 
-> :warning: **WARNING** Note that the registration process is subject to timeout constraints. The default value for an
+> **Note**  
+> Note that the registration process is subject to timeout constraints. The default value for an
 > initiated registration is 120 seconds. If you want to use registration initialization via QR code generation to - for
 > example - deliver generated QR codes to users via postal mail, then this timeout is unfeasible. You can increase
 > the timeout using the Hanko Developer Console (see [Prerequisites](#prerequisites)).
