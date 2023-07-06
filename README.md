@@ -478,8 +478,8 @@ To deregister a UAF/Authenticator App device for a user, issue a `DELETE` reques
   const devices = await response.json();
 ```
 
-> **Note:**
-> Credential deregistration removes only public credential material on the server side. This means that private 
+> **Note**
+> Device deregistration removes only public credential material on the server side. This means that private 
 > credential material will remain on an authenticator device unless a user explicitly deletes it from the authenticator.
 > How credential material can be removed depends on the model of the authenticator: some manufacturers like Yubico offer
 > dedicated software that provides a device settings UI, allowing for resetting the authenticator device. 
