@@ -7,7 +7,7 @@
         <#if hasUaf == true>
             <form action="${url.loginAction}" style="display:hidden" class="${properties.kcFFormClass!}" method="post">
                 <input class="${properties.kcButtonClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} btn-login-method"
-                       type="submit" name="switch" id="button_cancel" value="Hanko Authenticator"/>
+                       type="submit" name="switch" id="button_cancel" value="${msg('signInAuthenticator')}"/>
                 <input type="hidden" name="loginMethod" value="UAF"/>
             </form>
         </#if>
@@ -16,7 +16,7 @@
         <#if hasWebAuthn == true>
             <form action="${url.loginAction}" style="display:hidden" class="${properties.kcFFormClass!}" method="post">
                 <input class="${properties.kcButtonClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} btn-login-method"
-                       type="submit" name="switch" id="button_cancel" value="WebAuthn"/>
+                       type="submit" name="switch" id="button_cancel" value="${msg('signInWebAuthn')}"/>
                 <input type="hidden" name="loginMethod" value="WEBAUTHN"/>
             </form>
         </#if>
