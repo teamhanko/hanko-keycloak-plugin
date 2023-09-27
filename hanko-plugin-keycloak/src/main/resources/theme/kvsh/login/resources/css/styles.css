@@ -95,3 +95,22 @@ div.kc-logo-text {
   text-align: center;
   margin: 10px 0 20px;
 }
+
+#showPasswordButton {
+  border: none;
+}
+
+#showPasswordButton:hover {
+  border: none;
+  --pf-c-button--m-control--hover--after--BorderBottomWidth: var(--pf-global--BorderWidth--sm);
+}
+
+#showPasswordButton:focus {
+  border: none;
+  --pf-c-button--m-control--focus--after--BorderBottomWidth: var(--pf-global--BorderWidth--sm);
+}
+
+#showPasswordButton:active {
+  border: none;
+  --pf-c-button--m-control--active--after--BorderBottomWidth: var(--pf-global--BorderWidth--sm);
+}
