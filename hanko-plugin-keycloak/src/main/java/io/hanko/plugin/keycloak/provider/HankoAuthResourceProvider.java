@@ -29,7 +29,7 @@ public class HankoAuthResourceProvider implements RealmResourceProvider {
             String response = "{\"status\": \"" + hankoRequest.getStatus() + "\"}";
             return Response.ok(hankoRequest).entity(response).build();
         } catch (Exception ex) {
-            return Response.serverError().entity("Error getting Hanko request status.").build();
+            return Response.serverError().entity("Error getting Hanko request status :" + ex.getMessage()).build();
         }
     }
 

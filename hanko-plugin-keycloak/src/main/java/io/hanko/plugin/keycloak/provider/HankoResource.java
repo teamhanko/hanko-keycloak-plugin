@@ -63,7 +63,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.WEBAUTHN, user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not create Hanko WebAuthn request.");
+                    .entity("Could not create Hanko WebAuthn request: " + ex.getMessage());
             return response.build();
         }
     }
@@ -91,7 +91,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.verificationFailed(SupportedProtocols.WEBAUTHN, requestId, user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not verify Hanko WebAuthn request.");
+                    .entity("Could not verify Hanko WebAuthn request: " + ex.getMessage());
             return response.build();
         }
     }
@@ -129,7 +129,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.UAF, user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not create Hanko UAF request.");
+                    .entity("Could not create Hanko UAF request: " + ex.getMessage());
             return response.build();
         }
     }
@@ -160,7 +160,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.registrationFailed(SupportedProtocols.UAF, user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not get Hanko UAF request.");
+                    .entity("Could not get Hanko UAF request: " + ex.getMessage());
             return response.build();
         }
     }
@@ -187,7 +187,7 @@ public class HankoResource {
         } catch (ConfigException ex) {
             HankoLogger.uafCancelRequestFailed(user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not cancel Hanko UAF request.");
+                    .entity("Could not cancel Hanko UAF request: " + ex.getMessage());
             return response.build();
         }
     }
@@ -211,7 +211,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.getRegisteredDevicesFailed(user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not retrieve user's devices");
+                    .entity("Could not retrieve user's devices: " + ex.getMessage());
             return response.build();
         }
     }
@@ -245,7 +245,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.deregistrationFailed(SupportedProtocols.UAF, user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not deregister device.");
+                    .entity("Could not deregister device: " + ex.getMessage());
             return response.build();
         }
     }
@@ -276,7 +276,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.renameDeviceFailed(user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not rename device.");
+                    .entity("Could not rename device: " + ex.getMessage());
             return response.build();
         }
     }
@@ -310,7 +310,7 @@ public class HankoResource {
         } catch (Exception ex) {
             HankoLogger.deregistrationFailed(SupportedProtocols.WEBAUTHN, user, deviceId, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not deregister device.");
+                    .entity("Could not deregister device: " + ex.getMessage());
             return response.build();
         }
     }
