@@ -6,7 +6,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 
-import javax.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.NotAuthorizedException;
 
 public class UserFactory {
     private static User getUser(AuthenticationManager.AuthResult auth) {
