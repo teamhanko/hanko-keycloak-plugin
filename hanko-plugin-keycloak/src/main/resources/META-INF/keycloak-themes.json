@@ -2,11 +2,11 @@
     "themes": [
         {
             "name" : "keycloak-with-hanko",
-            "types": [ "account", "login" ]
+            "types": [ "login" ]
         },
         {
             "name" : "kvsh",
-            "types": [ "account", "login" ]
+            "types": [ "login" ]
         }
     ]
 }
