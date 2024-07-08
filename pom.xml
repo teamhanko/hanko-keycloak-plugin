@@ -20,7 +20,7 @@
 
     <properties>
         <revision>3.0.3</revision>
-        <version.keycloak>22.0.3</version.keycloak>
+        <version.keycloak>24.0.5</version.keycloak>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

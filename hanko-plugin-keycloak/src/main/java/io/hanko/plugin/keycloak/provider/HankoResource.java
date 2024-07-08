@@ -184,7 +184,7 @@ public class HankoResource {
             HankoRequest hankoRequest = hankoClient.cancelUafRequest(requestId);
             Response.ResponseBuilder response = Response.ok(hankoRequest);
             return response.build();
-        } catch (ConfigException ex) {
+        } catch (Exception ex) {
             HankoLogger.uafCancelRequestFailed(user, ex);
             Response.ResponseBuilder response = Response.serverError()
                     .entity("Could not cancel Hanko UAF request: " + ex.getMessage());

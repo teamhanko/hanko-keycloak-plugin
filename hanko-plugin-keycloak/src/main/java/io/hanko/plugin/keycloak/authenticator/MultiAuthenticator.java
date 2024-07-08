@@ -5,6 +5,10 @@ import io.hanko.plugin.keycloak.SupportedProtocols;
 import io.hanko.plugin.keycloak.user.User;
 import io.hanko.sdk.HankoClient;
 import io.hanko.sdk.models.*;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.NewCookie;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -15,16 +19,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.util.CookieHelper;
-import org.keycloak.utils.StringUtil;
 
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implements Authenticator {
     private final HankoClient hankoClient;
@@ -135,8 +132,15 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
     private void setAuthMethodCookie(LoginMethod loginMethod, AuthenticationFlowContext authenticationFlowContext) {
         URI uri = authenticationFlowContext.getUriInfo().getBaseUriBuilder().path("realms").path(authenticationFlowContext.getRealm().getName()).build();
         int maxCookieAge = 60 * 60 * 24 * 365; // 365 days
-        CookieHelper.addCookie("LOGIN_METHOD", loginMethod.name(), uri.getRawPath(), null, null,
-                maxCookieAge, false, true, authenticationFlowContext.getSession());
+        NewCookie cookie = new NewCookie.Builder("LOGIN_METHOD")
+                .value(loginMethod.name())
+                .path(uri.getRawPath())
+                .maxAge(maxCookieAge)
+                .secure(false)
+                .httpOnly(true)
+                .build();
+
+        authenticationFlowContext.getSession().getContext().getHttpResponse().setCookieIfAbsent(cookie);
     }
 
     private void cancelLogin(AuthenticationFlowContext context) {
@@ -172,9 +176,9 @@ public class MultiAuthenticator extends AbstractUsernameFormAuthenticator implem
         User user = new User(context.getUser());
         String hankoUserId = user.getHankoUserId();
 
-        boolean preferWebauthn = CookieHelper.getCookieValue(context.getSession(), "LOGIN_METHOD").contains(LoginMethod.WEBAUTHN.name());
-        boolean preferUaf = CookieHelper.getCookieValue(context.getSession(), "LOGIN_METHOD").contains(LoginMethod.UAF.name());
-        //boolean preferPassword = CookieHelper.getCookieValue("LOGIN_METHOD").contains(LoginMethod.PASSWORD.name());
+        Optional<Cookie> loginMethodCookie = Optional.ofNullable(context.getHttpRequest().getHttpHeaders().getCookies().get("LOGIN_METHOD"));
+        boolean preferWebauthn = loginMethodCookie.isPresent() && loginMethodCookie.get().getValue().contains(LoginMethod.WEBAUTHN.name());
+        boolean preferUaf = loginMethodCookie.isPresent() && loginMethodCookie.get().getValue().contains(LoginMethod.UAF.name());
 
         if (hankoUserId == null || hankoUserId.trim().isEmpty()) {
             return LoginMethod.EMPTY;
