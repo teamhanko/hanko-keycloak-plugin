@@ -1,9 +1,9 @@
 package io.hanko.plugin.keycloak.config;
 
-import java.util.stream.Collectors;
-
 import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.KeycloakSession;
+
+import java.util.stream.Collectors;
 
 public class KeycloakConfig extends AbstractConfig<KeycloakSession> {
 

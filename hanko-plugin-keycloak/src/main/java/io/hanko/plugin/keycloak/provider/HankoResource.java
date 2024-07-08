@@ -3,19 +3,18 @@ package io.hanko.plugin.keycloak.provider;
 import io.hanko.plugin.keycloak.HankoClientFactory;
 import io.hanko.plugin.keycloak.HankoLogger;
 import io.hanko.plugin.keycloak.SupportedProtocols;
-import io.hanko.plugin.keycloak.config.ConfigException;
 import io.hanko.plugin.keycloak.user.User;
 import io.hanko.plugin.keycloak.user.UserFactory;
 import io.hanko.sdk.HankoClient;
 import io.hanko.sdk.models.*;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 public class HankoResource {

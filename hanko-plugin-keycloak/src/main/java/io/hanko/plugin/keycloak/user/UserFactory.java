@@ -1,12 +1,11 @@
 package io.hanko.plugin.keycloak.user;
 
+import jakarta.ws.rs.NotAuthorizedException;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
-
-import jakarta.ws.rs.NotAuthorizedException;
 
 public class UserFactory {
     private static User getUser(AuthenticationManager.AuthResult auth) {

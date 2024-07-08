@@ -2,15 +2,14 @@ package io.hanko.plugin.keycloak.provider;
 
 import io.hanko.plugin.keycloak.HankoClientFactory;
 import io.hanko.sdk.models.HankoRequest;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.services.resource.RealmResourceProvider;
-
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.keycloak.models.KeycloakSession;
+import org.keycloak.services.resource.RealmResourceProvider;
 
 public class HankoAuthResourceProvider implements RealmResourceProvider {
 
