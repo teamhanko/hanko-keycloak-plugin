@@ -58,4 +58,7 @@ public class HankoLogger {
         LOGGER.warn("HANKO0013: init");
     }
 
+    static public void uafStatusRequestFailed(String requestId, User user, Throwable t) {
+        LOGGER.warnf("HANKO0014: Failed get status for UAF request with ID %s: request was not found or a technical error occurred - user: %s, message: %s", requestId, user, t);
+    }
 }

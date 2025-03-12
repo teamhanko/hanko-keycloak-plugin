@@ -157,9 +157,9 @@ public class HankoResource {
             Response.ResponseBuilder response = Response.ok(hankoRequest);
             return response.build();
         } catch (Exception ex) {
-            HankoLogger.registrationFailed(SupportedProtocols.UAF, user, ex);
+            HankoLogger.uafStatusRequestFailed(requestId, user, ex);
             Response.ResponseBuilder response = Response.serverError()
-                    .entity("Could not get Hanko UAF request: " + ex.getMessage());
+                    .entity(String.format("Could not get Hanko UAF request with ID %s: %s", requestId, ex.getMessage()));
             return response.build();
         }
     }
