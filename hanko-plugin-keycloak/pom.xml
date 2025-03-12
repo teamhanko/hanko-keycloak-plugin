@@ -53,7 +53,7 @@
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-			<version>2.3.31</version>
+			<version>2.3.34</version>
 		</dependency>
 
 
@@ -63,9 +63,9 @@
 		<finalName>hanko-plugin-keycloak</finalName>
 		<plugins>
 			<plugin>
-				<groupId>org.jboss.jandex</groupId>
+				<groupId>io.smallrye</groupId>
 				<artifactId>jandex-maven-plugin</artifactId>
-				<version>1.2.3</version>
+				<version>3.2.7</version>
 				<executions>
 					<execution>
 						<id>make-index</id>
