@@ -60,7 +60,8 @@
 	</dependencies>
 
 	<build>
-		<finalName>hanko-plugin-keycloak</finalName>
+        <finalName>hanko-plugin-keycloak-${project.version}-kc${version.keycloak}</finalName>
+
 		<plugins>
 			<plugin>
 				<groupId>io.smallrye</groupId>
