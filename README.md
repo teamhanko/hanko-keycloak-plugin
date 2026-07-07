@@ -19,8 +19,8 @@ or initiate device binding using the Hanko Authenticator.
     - [Configure a client](#configure-a-client)
     - [Configure authentication flows](#configure-authentication-flows)
       - [Prerequisites](#prerequisites)
-      - [Passwordless authentication flow](#passwordless-authentication-flow)
-      - [Passwordless authentication flow with password fallback](#passwordless-authentication-flow-with-password-fallback)
+      - [Hanko 2FA flow](#hanko-2fa-flow)
+      - [Hanko alternative flow](#hanko-alternative-flow)
 - Using the Plugin API
     - [Preliminary notes](#preliminary-notes)
     - [OpenAPI Spec](#openapi-spec)
@@ -176,7 +176,7 @@ Key secret as **Hanko API KEY ID** and **Hanko API KEY**. Save the configuration
 > as an alternative first, see [Hanko alternative flow](#hanko-alternative-flow)
 
 
-## Hanko alternative flow
+### Hanko alternative flow
 
 1. Log in to your Keycloak administration console.
 2. Go to configuration section **Realm Settings**, open the Themes tab and select `keycloak-with-hanko` as your
