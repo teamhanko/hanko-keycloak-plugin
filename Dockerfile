@@ -1,4 +1,5 @@
-FROM quay.io/keycloak/keycloak:21.1.1
+FROM quay.io/keycloak/keycloak:26.5.2
 
-COPY hanko-plugin-keycloak/target/hanko-plugin-keycloak.jar /opt/keycloak/providers/hanko-plugin-keycloak.jar
+COPY hanko-plugin-keycloak/target/hanko-plugin-keycloak-3.0.7-kc26.5.2.jar /opt/keycloak/providers/hanko-plugin-keycloak-3.0.7-kc26.5.2.jar
 
+RUN /opt/keycloak/bin/kc.sh build

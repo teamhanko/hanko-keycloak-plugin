@@ -16,6 +16,7 @@ or initiate device binding using the Hanko Authenticator.
 - [Building](#building)
 - [Running with Docker](#running-with-docker)
 - Configuration
+    - [Configure a client](#configure-a-client)
     - [Configure authentication flows](#configure-authentication-flows)
       - [Prerequisites](#prerequisites)
       - [Passwordless authentication flow](#passwordless-authentication-flow)
@@ -53,7 +54,7 @@ You can also build the plugin yourself, see section [Building](#building) for mo
 
 ## Building
 
-Ensure you have JDK 8 (or newer), Maven 3.1.1 (or newer), node (14+) and Git installed:
+Ensure you have JDK 17/21 (or newer), Maven 3.1.1 (or newer), node (14+) and Git installed:
 
 ```
 java -version
@@ -75,26 +76,38 @@ Build the plugin `jar` by running the following in the project root directory:
 mvn clean package
 ```
 
-You can find the `hanko-keycloak-plugin.jar` in the `target` folder of the `hanko-plugin-keycloak` directory.
+You can find the `hanko-plugin-keycloak-<version>-kc<keycloak_version>.jar` in the `target` folder 
+of the `hanko-plugin-keycloak` directory.
 
 ## Running with Docker
 
+Build the `jar` as described in the [Building](#building) section.
+
+In the project root run:
+
+```
+docker run -it \
+  --name <container_name>\
+  -p 8088:8080 \
+  -v $(pwd)/hanko-plugin-keycloak/target/hanko-plugin-keycloak-<version>-kc<kv_version>.jar:/opt/keycloak/providers/hanko.jar \
+  -e KEYCLOAK_ADMIN=admin \
+  -e KEYCLOAK_ADMIN_PASSWORD=admin \
+  quay.io/keycloak/keycloak:<kv_version> \
+  start
+```
+
+Alternatively:
+
 The repository contains a Dockerfile that can be used to create an image and run Keycloak with the plugin in a container.
-The Dockerfile uses the [keycloak](https://quay.io/repository/keycloak/keycloak) image. 
+The Dockerfile uses the [keycloak](https://quay.io/repository/keycloak/keycloak) image.
 
-1. Build the `jar` file:
-
-```
-mvn clean package
-```
-
-2. Build the Docker image:
+Build the Docker image:
 
 ```
 docker build -t <TAG> .
 ```
 
-3. Run the container and create an initial admin account (to be able to open Keycloak on localhost map port 8080 
+Run the container and create an initial admin account (to be able to open Keycloak on localhost map port 8080 
 locally).
 
 ```
@@ -104,24 +117,29 @@ docker run -e KEYCLOAK_ADMIN=<USERNAME> -e KEYCLOAK_ADMIN_PASSWORD=<PASSWORD> -p
 Keycloak uses an embedded H2 database per default. To run the container using a different database configuration see
 the section **Database** for the [keycloak](https://quay.io/repository/keycloak/keycloak) image.
 
+## Configure a client
+
+Before you start, you need to create a client in Keycloak. The client will be used to authenticate with Hanko. 
+The client ID and client secret will be used to configure Hanko.
+
+1. Log in to your Keycloak administration console.
+2. Go to the **Clients** section and click **Create**.
+3. Select **OpenID connect** as the **Client Type**, enter a **Client ID** and optionally a **Name** and **Description**.
+4. Click **Next**
+5. Under **Authentication flow**, select **Standard flow**. If you plan on retrieving access tokens
+via Oauth Resource Owner Password Credentials Grant flow, also check **Direct access grants**.
+6. Click **Next**
+7. As **Home URL** enter the URL where your client application runs, e.g. `http://localhost:3000`.
+8. As **Valid Redirect URIs** enter the URL in your application or use globbing, e.g. `http://localhost:3000/*`. 
+9. As **Web origins** enter the URL where your client application runs, e.g. `http://localhost:3000`.
+
 ## Configure authentication flows
 
 ### Prerequisites
 
-The plugin uses the API of the Hanko Authentication Service to perform 
-authentication. Hanko API endpoints are protected and hence require an 
-API Key ID/API Key pair to make authorized requests. In order to obtain an API Key ID/API Key pair: 
-
-1. Go to `https://console.old.hanko.io`
-2. Log in or register an account.
-3. Once signed in, create an organization. If you already created an organization, select the organization.
-4. Add a new relying party with the following properties:
-    - Relying Party Name: choose any name you want
-    - APP ID: **must** be a url with an `https` scheme.
-5. Click "Add new relying party". Select the created relying party to get to the relying party dashboard.
-6. On the relying party dashboard, select "General Settings" and then click "Add" in the "API Keys" panel.
-This will generate an API Key and an API Key ID. You should store the API Key securely since it cannot be obtained once
-you confirm and close the modal displayed after key generation.
+The plugin uses the Hanko API to perform authentication. Hanko API endpoints are protected and hence require an 
+API Key ID/API Key pair to make authorized requests. In order to obtain an API Key ID/API Key pair, please
+contact a Hanko team member. 
 
 > **Warning**
 > Do not make the API Key publicly available.
@@ -129,78 +147,62 @@ you confirm and close the modal displayed after key generation.
 The API Key ID/API Key pair will be used to configure Keycloak authentication flows (see the following sections for
 details).
 
-### Passwordless authentication flow
+### Hanko 2FA flow
 
 1. Log in to your Keycloak administration console.
-2. Go to configuration section **Realm Settings**, open the Themes tab and select `keycloak-with-hanko` as your **login-theme**.
-If you haven't already done so when [configuring a client](#configure-a-client), select `keycloak-with-hanko` as your **account-theme**.
-   ![Select your theme](./docs/resources/change-login-theme.png)
+2. Go to configuration section **Realm Settings**, open the Themes tab and select `keycloak-with-hanko` as your 
+**login-theme**. ![Select your theme](docs/resources/new/change-login-theme.png)
 3. Go to configuration section **Authentication**.
-4. Select the **Browser** authentication flow.
-5. Click **copy** in the top right corner of the table.
-   ![Copy browser flow](./docs/resources/copy-browser-flow.png)
-6. Give the new flow a meaningful name, for example **Browser flow with Hanko**.
-   ![Rename new flow](./docs/resources/rename-copy-of-flow.png)
-7. Select **Actions** and then **Delete** for the **Username Password Form**.
-8. Select **Actions** and then **Delete** for the **Conditional OTP** flow.
-   ![Delete actions](./docs/resources/delete-actions.png)
-9. Select **Actions** for the **Browser Flow With Hanko Forms** and add the execution **Username Form**.
-   ![Add Hanko actions](./docs/resources/add-execution-flows.png)
-10. Select **Actions** for **Browser Flow With Hanko Forms** and add the execution **Hanko Multi Authenticator**.
-Mark it as **required**.
-11. Open the configuration of the **Hanko Multi Authenticator** flow by selecting **Actions** -> **Config**. Provide 
-an alias for the configuration as well as your API Key ID and API Key secret. Save the configuration.
-    ![Open UAF Config](./docs/resources/open-hanko-config.png)
-12. Open the **Bindings** tab and change the **Browser Flow** to **Browser flow with Hanko**. Save the configuration.
-    ![Change Binding](./docs/resources/change-binding.png)
-    
+4. Click the three dots on the right for the **Browser** authentication flow.
+5. Click **Duplicate** in the top right corner of the table.
+6. Give the new flow a meaningful name, for example **Browser flow with Hanko - 2FA**.
+7. Under the browser **Browser flow with Hanko - 2FA authentication forms** flow, remove any unwanted sub-flows/exections but keep
+the **Username Password Form**.
+8. In the **Browser flow with Hanko - 2FA authentication forms** row, click the **+** icon and select **Add execution**. Search for
+**Hanko Multi Authenticator**, select it and click **Add**. Mark it as **Required**.
+9. Open the configuration of the **Hanko Multi Authenticator** flow by clicking the gear icon. Provide 
+an alias for the configuration. Set the **Hanko API URL** to `https://api.hanko.app`. Provide your API Key ID and API 
+Key secret as **Hanko API KEY ID** and **Hanko API KEY**. Save the configuration.
+10. Scroll to the top right of the page and select **Action** -> **Bind flow** and under **Choose binding type** select
+**Browser Flow**. Save the configuration.
+
+![2FA flow configuration](docs/resources/new/2fa-flow.png)
+        
 > **Warning**
-> Be careful when applying this authentication configuration to the master realm. Using this 
-> configuration a user **must** have a device registered in order to properly log in. If you are a master realm admin 
+> Be careful when applying this authentication configuration to a realm, especially the master realm. Using this 
+> configuration a user **must** have a device registered in order to properly log in. If you are a (master) realm admin 
 > user without registered devices and apply this configuration as your bound browser flow, you can lock yourself out of
-> the administration console. You can register devices using the enrollment feature. See 
-> [Configure enrollment](#configure-enrollment) and [Using enrollment](#using-enrollment).
+> your realm app or the keycloak administration console. You can register devices by configuring Hanko authentication
+> as an alternative first, see [Hanko alternative flow](#hanko-alternative-flow)
 
-## Passwordless authentication flow with password fallback
 
-If you still want a fallback to passwords as an alternative during login you can do so using a different authentication 
-configuration. Perform steps (1)-(9) as described in the previous section, then continue as follows:
+## Hanko alternative flow
 
-10. Select **Actions** for **Browser Flow With Hanko Forms** and select **Add Flow**.
-    ![Add flow](./docs/resources/add-flow.png)
-11. Give the flow a meaningful name, e.g. **Authentication**. Click **Save**.
-    ![Name flow](./docs/resources/add-flow-name.png)
-12. Mark the created **Authentication** flow as **required**.
-    ![Mark flow as required](./docs/resources/add-flow-required.png)
-13. Add another flow to the **Authentication** flow.
-    ![Add flow to authentication flow](./docs/resources/add-flow-pwless.png)
-14. Give the flow a meaningful name, e.g. **Passwordless**. Click **Save**.
-    ![Name passwordless flow](./docs/resources/add-flow-pwless-name.png)
-15. Mark the created **Passwordless** flow as **alternative**.
-    ![Mark passwordless flow as alternative](./docs/resources/add-flow-pwless-alternative.png)
-16. Add an execution to the **Passwordless** flow.
-    ![Add execution to passwordless flow](./docs/resources/add-flow-pwless-add-execution.png)
-17. Select **Hanko Multi Authenticator**. Click **Save**
-    ![Select Hanko Multi Authenticator as execution](./docs/resources/add-flow-pwless-add-execution-multi.png)
-18. Mark the **Hanko Multi Authenticator** execution as **required**.
-    ![Mark Hanko Multi Authenticator as required](./docs/resources/add-flow-pwless-add-execution-multi-required.png)
-19. Open the configuration of the **Hanko Multi Authenticator** execution by selecting **Actions** -> **Config**. Provide
-    an alias for the configuration as well as your API Key ID and API Key secret. Save the configuration.
-18. Add another flow to the **Authentication** flow (see step 13).
-19. Give the flow a meaningful name, e.g. **Password**. Click **Save**.
-    ![Name password flow](./docs/resources/add-flow-pw.png)
-20. Mark the **Password** flow as **alternative**.
-    ![Mark password flow as alternative](./docs/resources/add-flow-pw-alternative.png)
-21. Add an execution to the **Password** flow.
-    ![Add execution to password flow](./docs/resources/add-flow-pw-add-execution.png)
-22. Select **Password Form**. Click **Save**.
-    ![Select password form as execution](./docs/resources/add-flow-pw-add-execution-pf-form.png)
-23. Mark the **Password Form** execution as **required**.
-    ![Mark password form exeuction as required](./docs/resources/add-flow-pw-add-execution-pw-form-required.png)
-24. Open the **Bindings** tab and change the **Browser Flow** to **Browser flow with Hanko**. Save the configuration.
-    ![Change Binding](./docs/resources/change-binding.png)
+1. Log in to your Keycloak administration console.
+2. Go to configuration section **Realm Settings**, open the Themes tab and select `keycloak-with-hanko` as your
+   **login-theme**. ![Select your theme](docs/resources/new/change-login-theme.png)
+3. Go to configuration section **Authentication**.
+4. Click the three dots on the right for the **Browser** authentication flow.
+5. Click **Duplicate** in the top right corner of the table.
+6. Give the new flow a meaningful name, for example **Browser flow with Hanko - alternative**.
+7. Under the browser **Browser flow with Hanko - alternative authentication forms** flow, remove any unwanted sub-flows/exections.
+8. In the **Browser flow with Hanko - alternative authentication forms** row, click the **+** icon and select **Add execution**. Search for
+   **Username Form**, select it and click **Add**. Mark it as **Required**.
+9. In the **Browser flow with Hanko - alternative authentication forms** row, click the **+** icon and select **Add sub-flow**. 
+   Give it a name and set the **Flow type** to **generic**. Mark it as **Required**
+10. Add another sub-flow to the newly created sub-flow. Mark it as **Alternative**.
+11. In the sub-flow created in step 10, click the **+** icon and select **Add execution**. Search for
+    **Password Form**, select it and click **Add**. Mark it as **Required**.
+12. In the sub-flow created in step 9, click the **+** icon and add another sub-flow. Mark it as **Alternative**.
+13. In the sub-flow created in step 12, click the **+** icon and select **Add execution**. Search for
+    **Hanko Multi Authenticator**, select it and click **Add**. Mark it as **Required**.
+13. Open the configuration of the **Hanko Multi Authenticator** flow by clicking the gear icon. Provide
+    an alias for the configuration. Set the **Hanko API URL** to `https://api.hanko.app`. Provide your API Key ID and API
+    Key secret as **Hanko API KEY ID** and **Hanko API KEY**. Save the configuration.
+14. Scroll to the top right of the page and select **Action** -> **Bind flow** and under **Choose binding type** select
+    **Browser Flow**. Save the configuration.
 
-Users should now be able to login using either Password, WebAuthn or Authenticator App.
+![Alternative flow configuration](docs/resources/new/alternative-flow.png)
 
 ## Using the Plugin API
 
@@ -210,28 +212,63 @@ An OpenAPI specification for the endpoints can be found in the `/docs` directory
 
 ### Preliminary notes
 
-> **Note** 
+> [!IMPORTANT]
 > In order to register a device for a user from a specific realm said realm  **must** have a
 > **Hanko Multi Authenticator** execution configured in the Authentication configuration of the bound browser flow
 > (see [Configure Authentication Flows](#configure-authentication-flows)).
 
-> **Note**
+> [!IMPORTANT]
 > The session user/bearer of the access token **must** be able to manage users (role: `manage-users`)
 > in the realm of the user they want to perform actions for through the API endpoints.
 
-> **Note**  
-> Note that the registration process is subject to timeout constraints. The default value for an
-> initiated registration is 120 seconds. If you want to use registration initialization via QR code generation to - for
-> example - deliver generated QR codes to users via postal mail, then this timeout is unfeasible. You can increase
-> the timeout using the Hanko Developer Console (see [Prerequisites](#prerequisites)).
->1. Go to `https://console.hanko.io`.
->2. Log in to your account.
->3. Once signed in, click your profile name/icon in the top right and in the dropdown select "Change organization".
->4. Select the appropriate organization (i.e. the one you created in [Prerequisites](#prerequisites)).
->5. Select the appropriate relying party (i.e. the one you created in [Prerequisites](#prerequisites)).
->6. Select "FIDO Settings" in the menu on the left.
->7. Provide the desired value in the "Registration" input.
->8. Click "Update Changes".
+### Authentication with the Admin API
+
+Common ways to retrieve access tokens are via direct access grants for your client or using a service account client.
+
+#### Direct access grant
+
+Select your realm, then go to **Clients** and select your client. Under **Capability config**
+check **Direct access grants**.
+
+Then obtain a token by posting user credentials to the Keycloak token endpoint:
+
+```bash
+curl -X POST "<keycloak_server_url>/realms/<realm>/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password" \
+  -d "client_id=<your_client_id>" \
+  -d "username=<username>" \
+  -d "password=<password>"
+```
+
+If **Client authentication** is enabled for your client (confidential client), also include `-d "client_secret=<your_client_secret>"` in the request.
+
+#### Service account client
+
+A service account client is a confidential client that obtains tokens via the client credentials grant without requiring user interaction — suitable for backend or automated workflows.
+
+First, create a dedicated client: select your realm, go to **Clients** → **Create client**. Set **Client type** to `OpenID Connect` and provide a **Client ID**. On the next page, under **Capability config**, enable **Client authentication** and check **Service accounts roles**. After saving, copy the client secret from the **Credentials** tab.
+
+Next, assign the `manage-users` role: go to the **Service account roles** tab of your new client and add the `manage-users` role from the target realm.
+
+Then obtain a token using only the client credentials:
+
+```bash
+curl -X POST "<keycloak_server_url>/realms/<realm>/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=<your_client_id>" \
+  -d "client_secret=<your_client_secret>"
+```
+
+#### Using the access token
+
+Pass the access token obtained from either method as a Bearer token in the `Authorization` header of every request to the Admin API:
+
+```bash
+curl -X GET "<keycloak_server_url>/admin/realms/<app_realm>/hanko/<realmName>/<userId>/devices" \
+  -H "Authorization: Bearer <access_token>"
+```
 
 ### Register devices
 
