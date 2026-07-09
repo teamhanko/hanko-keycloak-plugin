@@ -41,7 +41,7 @@ or initiate device binding using the Hanko Authenticator.
 
 ## Compatibility
 
-The latest version of this plugin (3.0.0) has been tested with Keycloak 18.0.0
+The latest version of this plugin (3.0.0) has been tested with Keycloak 26.5.2
 
 You can also build the plugin yourself, see section [Building](#building) for more details.
 
