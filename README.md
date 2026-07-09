@@ -4,6 +4,9 @@ This is an extension to Keycloak which integrates passwordless authentication vi
 
 For more information about Keycloak, please visit the [Keycloak homepage](https://www.keycloak.org/).
 
+> [!IMPORTANT]
+> The plugin requires access to the Hanko API. Contact us at info@hanko.io for more info.
+
 ## Features
 
 - Log in with either password, Hanko Authenticator (FIDO UAF) or WebAuthn (FIDO2).
