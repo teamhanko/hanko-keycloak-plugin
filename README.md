@@ -57,12 +57,11 @@ You can also build the plugin yourself, see section [Building](#building) for mo
 
 ## Building
 
-Ensure you have JDK 21 (or newer), Maven 3.1.1 (or newer), node (14+) and Git installed:
+Ensure you have JDK 21 (or newer), Maven 3.9 (or newer) and Git installed:
 
 ```
 java -version
 mvn -version
-node -v
 git --version
 ```
 
