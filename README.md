@@ -41,7 +41,7 @@ or initiate device binding using the Hanko Authenticator.
 
 ## Compatibility
 
-The latest version of this plugin (3.0.0) has been tested with Keycloak 26.5.2
+The latest version of this plugin (3.0.7) has been tested with Keycloak 26.5.2
 
 You can also build the plugin yourself, see section [Building](#building) for more details.
 
@@ -54,7 +54,7 @@ You can also build the plugin yourself, see section [Building](#building) for mo
 
 ## Building
 
-Ensure you have JDK 17/21 (or newer), Maven 3.1.1 (or newer), node (14+) and Git installed:
+Ensure you have JDK 21 (or newer), Maven 3.1.1 (or newer), node (14+) and Git installed:
 
 ```
 java -version
