@@ -45,7 +45,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.10.4",
     "@babel/preset-react": "^7.10.4",
-    "@svgr/webpack": "^4.3.3",
+    "@svgr/webpack": "^8.1.0",
     "@types/react-intl": "^2.3.18",
     "babel-plugin-react-intl": "^3.5.1",
     "glamor": "^2.20.40",
